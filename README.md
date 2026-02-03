@@ -1,2 +1,2 @@
-# His-edu-mini-app
+# His-edu-6
 a story for everyone
