@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Конспект Про</title>
+    <!-- Подключаем Telegram SDK -->
+    <script src="https://telegram.org"></script>
+    <style>
+        /* Используем системные переменные Telegram для идеального соответствия теме */
+        :root {
+            --bg-color: var(--tg-theme-bg-color, #ffffff);
+            --text-color: var(--tg-theme-text-color, #000000);
+            --hint-color: var(--tg-theme-hint-color, #999999);
+            --link-color: var(--tg-theme-link-color, #2481cc);
+            --button-color: var(--tg-theme-button-color, #2481cc);
+            --button-text: var(--tg-theme-button-text-color, #ffffff);
+            --sec-bg: var(--tg-theme-secondary-bg-color, #f4f4f5);
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 16px;
+            line-height: 1.5;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .header { margin-bottom: 20px; text-align: center; }
+        .header h1 { font-size: 20px; margin: 0; font-weight: 700; }
+        .header p { color: var(--hint-color); font-size: 14px; margin-top: 4px; }
+
+        /* Сетка кнопок */
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+        
+        button {
+            border: none;
+            border-radius: 12px;
+            padding: 12px 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background-color: var(--button-color);
+            color: var(--button-text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        button:active { transform: scale(0.96); opacity: 0.9; }
+        button:disabled { background-color: var(--hint-color); opacity: 0.5; cursor: not-allowed; }
+        
+        /* Кнопка Теста выделяется */
+        .btn-test { grid-column: span 2; background-color: transparent; border: 2px solid var(--button-color); color: var(--button-color); margin-top: 5px; }
+
+        /* Поле результата */
+        #result-wrapper { 
+            display: none; 
+            background: var(--sec-bg); 
+            border-radius: 16px; 
+            padding: 16px; 
+            margin-top: 10px;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        #result-text { font-size: 15px; white-space: pre-wrap; margin-bottom: 15px; }
+
+        .copy-btn { width: 100%; background-color: #34c759; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Экран ошибки */
+        #error-screen { display: none; text-align: center; padding-top: 50px; }
+        .error-icon { font-size: 48px; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+
+    <div id="main-ui">
+        <div class="header">
+            <h1>Учебный помощник</h1>
+            <p>Выберите, что нужно извлечь из лекции</p>
+        </div>
+
+        <div class="grid">
+            <button onclick="apiCall('short_summary')">⚡ Кратко</button>
+            <button onclick="apiCall('medium_summary')">📄 Средне</button>
+            <button onclick="apiCall('detailed_summary')">📚 Подробно</button>
+            <button onclick="apiCall('dates')">📅 Даты</button>
+            <button onclick="apiCall('terms')">📖 Термины</button>
+            <button onclick="apiCall('qa')">❓ Q&A</button>
+            <button class="btn-test" onclick="apiCall('test')">📝 Сгенерировать тест через ИИ</button>
+        </div>
+
+        <div id="result-wrapper">
+            <button class="copy-btn" onclick="copyToClipboard()">📋 Копировать результат</button>
+            <div id="result-text"></div>
+        </div>
+    </div>
+
+    <div id="error-screen">
+        <div class="error-icon">🔒</div>
+        <h2>Доступ ограничен</h2>
+        <p>Пожалуйста, запустите приложение через бота.</p>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        const urlParams = new URLSearchParams(window.location.search);
+        const pId = urlParams.get('id'); // ID записи из Google Sheets
+
+        // Настройка WebApp
+        tg.expand();
+        tg.ready();
+        tg.enableClosingConfirmation(); // Чтобы не закрыли случайно
+
+        async function apiCall(action) {
+            const wrapper = document.getElementById('result-wrapper');
+            const display = document.getElementById('result-text');
+            
+            // Виброотклик при нажатии
+            tg.HapticFeedback.impactOccurred('medium');
+
+            display.innerText = "⏳ Обработка запроса...";
+            wrapper.style.display = 'block';
+            
+            // Блокируем кнопки
+            const buttons = document.querySelectorAll('button');
+            buttons.forEach(b => b.disabled = true);
+
+            try {
+                // ВАЖНО: Подставьте ваши URL из n8n
+                const baseUrl = 'ВАШ_URL_ОСНОВНОЙ';
+                const testUrl = 'ВАШ_URL_ДЛЯ_ТЕСТА';
+                const targetUrl = action === 'test' ? testUrl : baseUrl;
+
+                const response = await fetch(`${targetUrl}?id=${pId}&action=${action}&auth=${encodeURIComponent(tg.initData)}`);
+
+                if (response.status === 401 || response.status === 403) {
+                    document.getElementById('main-ui').style.display = 'none';
+                    document.getElementById('error-screen').style.display = 'block';
+                    return;
+                }
+
+                const data = await response.text();
+                display.innerText = data;
+                tg.HapticFeedback.notificationOccurred('success');
+
+            } catch (error) {
+                display.innerText = "❌ Ошибка сети или сервера.";
+                tg.HapticFeedback.notificationOccurred('error');
+            } finally {
+                buttons.forEach(b => b.disabled = false);
+            }
+        }
+
+        function copyToClipboard() {
+            const text = document.getElementById('result-text').innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                tg.HapticFeedback.notificationOccurred('success');
+                tg.showAlert("Текст скопирован!");
+            });
+        }
+    </script>
+</body>
+</html>
