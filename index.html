@@ -76,7 +76,7 @@
         <h3 id="current-paragraph-title">Действия</h3>
         <button onclick="apiCall('short_summary')">⚡ Краткий пересказ</button>
         <button onclick="apiCall('medium_summary')">📄 Средний пересказ</button>
-        <button onclick="apiCall('detailed_summary')">📚 Подробный разбор</button>
+        <button onclick="apiCall('detailed_summary')">📚 Подробный пересказ</button>
         <button onclick="apiCall('dates')">📅 Основные даты</button>
         <button onclick="apiCall('terms')">📖 Основные термины и определения</button>
         <button onclick="apiCall('qa')">❓ Вопросы и ответы</button>
@@ -142,7 +142,7 @@
 
             try {
                 // ВАЖНО: Подставьте ваши Production URL из n8n
-                const targetUrl = 'ВАШ_ЕДИНЫЙ_ИЛИ_ОСНОВНОЙ_URL_N8N'; 
+                const targetUrl = 'https://hisedu.app.n8n.cloud/webhook/6b2e1e97-a736-4593-9263-817bf345391f'; 
                 
                 // Если action='test', diff берется из параметра функции, иначе по умолчанию 'medium'
                 // ID параграфа (currentPId) используется только если мы не на экране теста
@@ -174,3 +174,4 @@
     </script>
 </body>
 </html>
+
