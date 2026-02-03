@@ -86,18 +86,18 @@
 
     <div id="main-ui">
         <div class="header">
-            <h1>Учебный помощник</h1>
-            <p>Выберите, что нужно извлечь из лекции</p>
+            <h1>История для всех</h1>
+            <p>Выбери параграф</p>
         </div>
 
         <div class="grid">
-            <button onclick="apiCall('short_summary')">⚡ Кратко</button>
-            <button onclick="apiCall('medium_summary')">📄 Средне</button>
-            <button onclick="apiCall('detailed_summary')">📚 Подробно</button>
-            <button onclick="apiCall('dates')">📅 Даты</button>
-            <button onclick="apiCall('terms')">📖 Термины</button>
+            <button onclick="apiCall('short_summary')">⚡ Краткий пересказ</button>
+            <button onclick="apiCall('medium_summary')">📄 Средний пересказ</button>
+            <button onclick="apiCall('detailed_summary')">📚 Подробный пересказ</button>
+            <button onclick="apiCall('dates')">📅 Основные даты</button>
+            <button onclick="apiCall('terms')">📖 Основные термины</button>
             <button onclick="apiCall('qa')">❓ Q&A</button>
-            <button class="btn-test" onclick="apiCall('test')">📝 Сгенерировать тест через ИИ</button>
+            <button class="btn-test" onclick="apiCall('test')">📝 Пройти тест по Истории</button>
         </div>
 
         <div id="result-wrapper">
@@ -138,8 +138,8 @@
 
             try {
                 // ВАЖНО: Подставьте ваши URL из n8n
-                const baseUrl = 'ВАШ_URL_ОСНОВНОЙ';
-                const testUrl = 'ВАШ_URL_ДЛЯ_ТЕСТА';
+                const baseUrl = 'https://hisedu.app.n8n.cloud/webhook/6b2e1e97-a736-4593-9263-817bf345391f';
+                const testUrl = 'https://hisedu.app.n8n.cloud/webhook-test/6b2e1e97-a736-4593-9263-817bf345391f';
                 const targetUrl = action === 'test' ? testUrl : baseUrl;
 
                 const response = await fetch(`${targetUrl}?id=${pId}&action=${action}&auth=${encodeURIComponent(tg.initData)}`);
@@ -172,3 +172,4 @@
     </script>
 </body>
 </html>
+
