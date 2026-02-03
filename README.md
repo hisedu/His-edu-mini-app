@@ -1,2 +1,2 @@
 # His-edu-6
-a story for everyone
+a History for everyone
