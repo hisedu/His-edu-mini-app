@@ -106,8 +106,7 @@ if (window.Telegram && window.Telegram.WebApp) {
     // --- Логика экранов ---
     function showScreen(screenId) {
         document.querySelectorAll('.screen-container').forEach(el => el.style.display = 'none');
-        document.getElementById('result-wrapper').style.display = 'none'; // Скрываем результат при 
-        навигации
+        document.getElementById('result-wrapper').style.display = 'none'; // Скрываем результат при навигации
         document.getElementById(screenId).style.display = 'flex';
         tg.HapticFeedback.impactOccurred('light');
     }
@@ -184,3 +183,4 @@ if (window.Telegram && window.Telegram.WebApp) {
 </script>
 </body>
 </html>
+
