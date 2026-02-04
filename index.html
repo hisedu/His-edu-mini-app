@@ -96,78 +96,91 @@ translateY(0); } }
 <div id="result-text"></div>
 </div>
 <script>
-const tg = window.Telegram.WebApp;
-let currentPId = null; // Глобально храним выбранный ID параграфа
-tg.expand();
-tg.ready();
-// --- Логика экранов ---
-function showScreen(screenId) {
-document.querySelectorAll('.screen-container').forEach(el => el.style.display = 'none');
-document.getElementById('result-wrapper').style.display = 'none'; // Скрываем результат при 
-навигации
-document.getElementById(screenId).style.display = 'flex';
-tg.HapticFeedback.impactOccurred('light');
+// Добавлена проверка наличия объекта перед использованием
+if (window.Telegram && window.Telegram.WebApp) {
+    const tg = window.Telegram.WebApp;
+    let currentPId = null; // Глобально храним выбранный ID параграфа
+    tg.expand();
+    tg.ready();
+
+    // --- Логика экранов ---
+    function showScreen(screenId) {
+        document.querySelectorAll('.screen-container').forEach(el => el.style.display = 'none');
+        document.getElementById('result-wrapper').style.display = 'none'; // Скрываем результат при 
+        навигации
+        document.getElementById(screenId).style.display = 'flex';
+        tg.HapticFeedback.impactOccurred('light');
+    }
+
+    // --- Логика 43 кнопок параграфов ---
+    function generateParagraphButtons() {
+        const grid = document.getElementById('paragraph-buttons-grid');
+        for (let i = 1; i <= 43; i++) {
+            const button = document.createElement('button');
+            button.textContent = i;
+            button.onclick = () => selectParagraph(i);
+            grid.appendChild(button);
+        }
+    }
+
+    function selectParagraph(pId) {
+        currentPId = pId; // Запоминаем ID глобально
+        document.getElementById('current-paragraph-title').innerText = `Параграф ${currentPId}`;
+        showScreen('screen-paragraph-actions'); // Переходим к действиям
+    }
+
+    // --- Логика запросов к n8n ---
+    async function apiCall(action, difficulty = 'medium') { // По умолчанию сложность средняя
+        const display = document.getElementById('result-text');
+        const buttons = document.querySelectorAll('button');
+        buttons.forEach(b => b.disabled = true);
+        display.innerText = "⏳ Загрузка...";
+        document.getElementById('result-wrapper').style.display = 'block';
+        try {
+            // ВАЖНО: Подставьте ваши Production URL из n8n
+            const targetUrl = 'https://hisedu.app.n8n.cloud'; 
+            // Если action='test', diff берется из параметра функции, иначе по умолчанию 'medium'
+            // ID параграфа (currentPId) используется только если мы не на экране теста
+            const finalPId = (action === 'test' || action === 'test_hard') ? 'N/A' : currentPId;
+            const url = 
+            `${targetUrl}?id=${finalPId}&action=${action}&diff=${difficulty}&auth=${encodeURIComponent(tg.initData)}`;
+            const response = await fetch(url);
+            // ... (Обработка ошибок 401/403 должна быть здесь) ...
+            const data = await response.text();
+            display.innerText = data;
+        } catch (error) {
+            display.innerText = "❌ Ошибка.";
+        } finally { // ИСПРАВЛЕНО: Правильный синтаксис finally блока
+            buttons.forEach(b => b.disabled = false);
+        }
+    }
+
+    function copyToClipboard() {
+        const resultTextElement = document.getElementById('result-text');
+        const textToCopy = resultTextElement.textContent || resultTextElement.innerText;
+        if (textToCopy) {
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                const copyBtn = document.querySelector('.copy-btn');
+                copyBtn.textContent = '✅ Скопировано!';
+                tg.HapticFeedback.notificationOccurred('success'); 
+                setTimeout(() => {
+                    copyBtn.textContent = '📋 Копировать результат';
+                }, 2000);
+            }).catch(err => {
+                console.error('Ошибка копирования: ', err);
+                alert('Не удалось скопировать текст.');
+            });
+        }
+    }
+
+    // Инициализация при старте
+    generateParagraphButtons();
+    showScreen('screen-main'); // Показываем главный экран при загрузке
+
+} else {
+    console.error("Telegram WebApp объект не найден. Запустите приложение внутри Telegram.");
+    alert("Пожалуйста, откройте это приложение внутри Telegram.");
 }
-// --- Логика 43 кнопок параграфов ---
-function generateParagraphButtons() {
-const grid = document.getElementById('paragraph-buttons-grid');
-for (let i = 1; i <= 43; i++) {
-const button = document.createElement('button');
-button.textContent = i;
-button.onclick = () => selectParagraph(i);
-grid.appendChild(button);
-}
-}
-function selectParagraph(pId) {
-currentPId = pId; // Запоминаем ID глобально
-document.getElementById('current-paragraph-title').innerText = `Параграф ${currentPId}`;
-showScreen('screen-paragraph-actions'); // Переходим к действиям
-}
-// --- Логика запросов к n8n ---
-async function apiCall(action, difficulty = 'medium') { // По умолчанию сложность средняя
-const display = document.getElementById('result-text');
-const buttons = document.querySelectorAll('button');
-buttons.forEach(b => b.disabled = true);
-display.innerText = "⏳ Загрузка...";
-document.getElementById('result-wrapper').style.display = 'block';
-try {
-// ВАЖНО: Подставьте ваши Production URL из n8n
-const targetUrl = 'https://hisedu.app.n8n.cloud'; 
-// Если action='test', diff берется из параметра функции, иначе по умолчанию 'medium'
-// ID параграфа (currentPId) используется только если мы не на экране теста
-const finalPId = (action === 'test' || action === 'test_hard') ? 'N/A' : currentPId;
-const url = 
-`${targetUrl}?id=${finalPId}&action=${action}&diff=${difficulty}&auth=${encodeURIComponent(tg.initData)}`;
-const response = await fetch(url);
-// ... (Обработка ошибок 401/403 должна быть здесь) ...
-const data = await response.text();
-display.innerText = data;
-} catch (error) {
-display.innerText = "❌ Ошибка.";
-} finally { // ИСПРАВЛЕНО: Правильный синтаксис finally блока
-buttons.forEach(b => b.disabled = false);
-}
-}
-function copyToClipboard() {
- const resultTextElement = document.getElementById('result-text');
- const textToCopy = resultTextElement.textContent || resultTextElement.innerText;
- if (textToCopy) {
- navigator.clipboard.writeText(textToCopy).then(() => {
- const copyBtn = document.querySelector('.copy-btn');
- copyBtn.textContent = '✅ Скопировано!';
- tg.HapticFeedback.notificationOccurred('success'); 
- setTimeout(() => {
- copyBtn.textContent = '📋 Копировать результат';
- }, 2000);
- }).catch(err => {
- console.error('Ошибка копирования: ', err);
- alert('Не удалось скопировать текст.');
- });
- }
-}
-// Инициализация при старте
-generateParagraphButtons();
-showScreen('screen-main'); // Показываем главный экран при загрузке
 </script>
 </body>
 </html>
