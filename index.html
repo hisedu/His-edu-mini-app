@@ -1,175 +1,186 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Конспект Про</title>
-    <!-- Подключаем Telegram SDK -->
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <style>
-        /* Используем системные переменные Telegram для идеального соответствия теме */
-        :root {
-            --bg-color: var(--tg-theme-bg-color, #ffffff);
-            --text-color: var(--tg-theme-text-color, #000000);
-            --hint-color: var(--tg-theme-hint-color, #999999);
-            --link-color: var(--tg-theme-link-color, #2481cc);
-            --button-color: var(--tg-theme-button-color, #2481cc);
-            --button-text: var(--tg-theme-button-text-color, #ffffff);
-            --sec-bg: var(--tg-theme-secondary-bg-color, #f4f4f5);
-        }
-
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            margin: 0;
-            padding: 16px;
-            line-height: 1.5;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
-
-        .header { margin-bottom: 20px; text-align: center; }
-        .header h1 { font-size: 20px; margin: 0; font-weight: 700; }
-        .header p { color: var(--hint-color); font-size: 14px; margin-top: 4px; }
-
-        /* Сетка кнопок */
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
-        
-        button {
-            border: none;
-            border-radius: 12px;
-            padding: 12px 10px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            background-color: var(--button-color);
-            color: var(--button-text);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        button:active { transform: scale(0.96); opacity: 0.9; }
-        button:disabled { background-color: var(--hint-color); opacity: 0.5; cursor: not-allowed; }
-        
-        /* Кнопка Теста выделяется */
-        .btn-test { grid-column: span 2; background-color: transparent; border: 2px solid var(--button-color); color: var(--button-color); margin-top: 5px; }
-
-        /* Поле результата */
-        #result-wrapper { 
-            display: none; 
-            background: var(--sec-bg); 
-            border-radius: 16px; 
-            padding: 16px; 
-            margin-top: 10px;
-            animation: fadeIn 0.3s ease;
-        }
-        
-        #result-text { font-size: 15px; white-space: pre-wrap; margin-bottom: 15px; }
-
-        .copy-btn { width: 100%; background-color: #34c759; }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* Экран ошибки */
-        #error-screen { display: none; text-align: center; padding-top: 50px; }
-        .error-icon { font-size: 48px; margin-bottom: 10px; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>His Edu App</title>
+<!-- ИСПРАВЛЕНО: Правильный URL для SDK Telegram -->
+<script src="https://telegram.org/js/telegram-web-app.js"></script> 
+<style>
+/* Используем системные переменные Telegram */
+:root {
+--bg-color: var(--tg-theme-bg-color, #ffffff);
+--text-color: var(--tg-theme-text-color, #000000);
+--hint-color: var(--tg-theme-hint-color, #999999);
+--button-color: var(--tg-theme-button-color, #2481cc);
+--button-text: var(--tg-theme-button-text-color, #ffffff);
+--sec-bg: var(--tg-theme-secondary-bg-color, #f4f4f5);
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body {
+font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+background-color: var(--bg-color);
+color: var(--text-color);
+margin: 0;
+padding: 16px;
+line-height: 1.5;
+display: flex;
+flex-direction: column;
+min-height: 100vh;
+}
+.screen-container { display: none; flex-direction: column; gap: 10px; }
+.header { margin-bottom: 10px; }
+.header h1 { font-size: 20px; margin: 0; font-weight: 700; }
+.header p { color: var(--hint-color); font-size: 14px; margin-top: 4px; }
+/* ИСПРАВЛЕНО: Изменен тег с 'buton' на 'button' */
+button {
+border: none; border-radius: 12px; padding: 12px 10px; font-size: 14px;
+font-weight: 600; cursor: pointer; background-color: var(--button-color);
+color: var(--button-text); transition: all 0.2s ease;
+}
+button:active { transform: scale(0.98); }
+button:disabled { background-color: var(--hint-color); opacity: 0.6; cursor: not-allowed; }
+.grid-buttons { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+/* Поле результата */
+#result-wrapper { display: none; background: var(--sec-bg); border-radius: 16px; padding: 16px; 
+margin-top: 20px; animation: fadeIn 0.3s ease; }
+#result-text { font-size: 15px; white-space: pre-wrap; margin-bottom: 15px; }
+.copy-btn { width: 100%; background-color: #34c759; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: 
+translateY(0); } }
+</style>
 </head>
 <body>
+<!-- ЭКРАН 1: Главное меню -->
+<div id="screen-main" class="screen-container">
+<div class="header">
+<h1>История для всех</h1>
+<p>Выберите параграф</p>
+</div>
+<button onclick="showScreen('screen-paragraph-list')">📖 Выбери параграф (43 шт)</button>
+<button onclick="showScreen('screen-test-difficulty')">🧠 Тест по истории</button>
+</div>
+<!-- ЭКРАН 2: Список параграфов (43 кнопки) -->
+<div id="screen-paragraph-list" class="screen-container">
+<button onclick="showScreen('screen-main')">← Назад</button>
+<div class="header">
+<h3>Выберите номер параграфа</h3>
+</div>
+<div id="paragraph-buttons-grid" class="grid-buttons">
+<!-- Кнопки 1-43 будут сгенерированы скриптом здесь -->
+</div>
+</div>
+<!-- ЭКРАН 3: Действия с параграфом (пересказы, даты) -->
+<div id="screen-paragraph-actions" class="screen-container">
+<button onclick="showScreen('screen-paragraph-list')">← Назад к списку параграфов</button>
+<h3 id="current-paragraph-title">Действия</h3>
+<button onclick="apiCall('short_summary')">📝 Краткий пересказ</button>
+<button onclick="apiCall('medium_summary')">📚 Средний пересказ</button>
+<button onclick="apiCall('detailed_summary')">🔎 Подробный пересказ</button>
+<button onclick="apiCall('dates')">📅 Основные даты</button>
+<button onclick="apiCall('terms')">💡 Основные термины и определения</button>
+<button onclick="apiCall('qa')">❓ Вопросы и ответы</button>
+</div>
+<!-- ЭКРАН 4: Выбор сложности теста -->
+<div id="screen-test-difficulty" class="screen-container">
+<button onclick="showScreen('screen-main')">← Назад в меню</button>
+<div class="header">
+<h3>Выберите сложность теста</h3>
+</div>
+<button onclick="apiCall('test', 'easy')">🟩 Лёгкий тест</button>
+<button onclick="apiCall('test', 'hard')">🟥 Сложный тест</button>
+</div>
+<!-- Контейнер результата (единый для всех экранов) -->
+<div id="result-wrapper">
+<button class="copy-btn" onclick="copyToClipboard()">📋 Копировать результат</button>
+<div id="result-text"></div>
+</div>
+<script>
+// Добавлена проверка наличия объекта перед использованием
+if (window.Telegram && window.Telegram.WebApp) {
+    const tg = window.Telegram.WebApp;
+    let currentPId = null; // Глобально храним выбранный ID параграфа
+    tg.expand();
+    tg.ready();
 
-    <div id="main-ui">
-        <div class="header">
-            <h1>Учебный помощник</h1>
-            <p>Выберите, что нужно извлечь из лекции</p>
-        </div>
+    // --- Логика экранов ---
+    function showScreen(screenId) {
+        document.querySelectorAll('.screen-container').forEach(el => el.style.display = 'none');
+        document.getElementById('result-wrapper').style.display = 'none'; // Скрываем результат при 
+        навигации
+        document.getElementById(screenId).style.display = 'flex';
+        tg.HapticFeedback.impactOccurred('light');
+    }
 
-        <div class="grid">
-            <button onclick="apiCall('short_summary')">⚡ Кратко</button>
-            <button onclick="apiCall('medium_summary')">📄 Средне</button>
-            <button onclick="apiCall('detailed_summary')">📚 Подробно</button>
-            <button onclick="apiCall('dates')">📅 Даты</button>
-            <button onclick="apiCall('terms')">📖 Термины</button>
-            <button onclick="apiCall('qa')">❓ Q&A</button>
-            <button class="btn-test" onclick="apiCall('test')">📝 Сгенерировать тест через ИИ</button>
-        </div>
-
-        <div id="result-wrapper">
-            <button class="copy-btn" onclick="copyToClipboard()">📋 Копировать результат</button>
-            <div id="result-text"></div>
-        </div>
-    </div>
-
-    <div id="error-screen">
-        <div class="error-icon">🔒</div>
-        <h2>Доступ ограничен</h2>
-        <p>Пожалуйста, запустите приложение через бота.</p>
-    </div>
-
-    <script>
-        const tg = window.Telegram.WebApp;
-        const urlParams = new URLSearchParams(window.location.search);
-        const pId = urlParams.get('id'); // ID записи из Google Sheets
-
-        // Настройка WebApp
-        tg.expand();
-        tg.ready();
-        tg.enableClosingConfirmation(); // Чтобы не закрыли случайно
-
-        async function apiCall(action) {
-            const wrapper = document.getElementById('result-wrapper');
-            const display = document.getElementById('result-text');
-            
-            // Виброотклик при нажатии
-            tg.HapticFeedback.impactOccurred('medium');
-
-            display.innerText = "⏳ Обработка запроса...";
-            wrapper.style.display = 'block';
-            
-            // Блокируем кнопки
-            const buttons = document.querySelectorAll('button');
-            buttons.forEach(b => b.disabled = true);
-
-            try {
-                // ВАЖНО: Подставьте ваши URL из n8n
-                const baseUrl = 'ВАШ_URL_ОСНОВНОЙ';
-                const testUrl = 'ВАШ_URL_ДЛЯ_ТЕСТА';
-                const targetUrl = action === 'test' ? testUrl : baseUrl;
-
-                const response = await fetch(`${targetUrl}?id=${pId}&action=${action}&auth=${encodeURIComponent(tg.initData)}`);
-
-                if (response.status === 401 || response.status === 403) {
-                    document.getElementById('main-ui').style.display = 'none';
-                    document.getElementById('error-screen').style.display = 'block';
-                    return;
-                }
-
-                const data = await response.text();
-                display.innerText = data;
-                tg.HapticFeedback.notificationOccurred('success');
-
-            } catch (error) {
-                display.innerText = "❌ Ошибка сети или сервера.";
-                tg.HapticFeedback.notificationOccurred('error');
-            } finally {
-                buttons.forEach(b => b.disabled = false);
-            }
+    // --- Логика 43 кнопок параграфов ---
+    function generateParagraphButtons() {
+        const grid = document.getElementById('paragraph-buttons-grid');
+        for (let i = 1; i <= 43; i++) {
+            const button = document.createElement('button');
+            button.textContent = i;
+            button.onclick = () => selectParagraph(i);
+            grid.appendChild(button);
         }
+    }
 
-        function copyToClipboard() {
-            const text = document.getElementById('result-text').innerText;
-            navigator.clipboard.writeText(text).then(() => {
-                tg.HapticFeedback.notificationOccurred('success');
-                tg.showAlert("Текст скопирован!");
+    function selectParagraph(pId) {
+        currentPId = pId; // Запоминаем ID глобально
+        document.getElementById('current-paragraph-title').innerText = `Параграф ${currentPId}`;
+        showScreen('screen-paragraph-actions'); // Переходим к действиям
+    }
+
+    // --- Логика запросов к n8n ---
+    async function apiCall(action, difficulty = 'medium') { // По умолчанию сложность средняя
+        const display = document.getElementById('result-text');
+        const buttons = document.querySelectorAll('button');
+        buttons.forEach(b => b.disabled = true);
+        display.innerText = "⏳ Загрузка...";
+        document.getElementById('result-wrapper').style.display = 'block';
+        try {
+            // ВАЖНО: Подставьте ваши Production URL из n8n
+            const targetUrl = 'https://hisedu.app.n8n.cloud/webhook/6b2e1e97-a736-4593-9263-817bf345391f'; 
+            // Если action='test', diff берется из параметра функции, иначе по умолчанию 'medium'
+            // ID параграфа (currentPId) используется только если мы не на экране теста
+            const finalPId = (action === 'test' || action === 'test_hard') ? 'N/A' : currentPId;
+            const url = 
+            `${targetUrl}?id=${finalPId}&action=${action}&diff=${difficulty}&auth=${encodeURIComponent(tg.initData)}`;
+            const response = await fetch(url);
+            // ... (Обработка ошибок 401/403 должна быть здесь) ...
+            const data = await response.text();
+            display.innerText = data;
+        } catch (error) {
+            display.innerText = "❌ Ошибка.";
+        } finally { // ИСПРАВЛЕНО: Правильный синтаксис finally блока
+            buttons.forEach(b => b.disabled = false);
+        }
+    }
+
+    function copyToClipboard() {
+        const resultTextElement = document.getElementById('result-text');
+        const textToCopy = resultTextElement.textContent || resultTextElement.innerText;
+        if (textToCopy) {
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                const copyBtn = document.querySelector('.copy-btn');
+                copyBtn.textContent = '✅ Скопировано!';
+                tg.HapticFeedback.notificationOccurred('success'); 
+                setTimeout(() => {
+                    copyBtn.textContent = '📋 Копировать результат';
+                }, 2000);
+            }).catch(err => {
+                console.error('Ошибка копирования: ', err);
+                alert('Не удалось скопировать текст.');
             });
         }
-    </script>
+    }
+
+    // Инициализация при старте
+    generateParagraphButtons();
+    showScreen('screen-main'); // Показываем главный экран при загрузке
+
+} else {
+    console.error("Telegram WebApp объект не найден. Запустите приложение внутри Telegram.");
+    alert("Пожалуйста, откройте это приложение внутри Telegram.");
+}
+</script>
 </body>
 </html>
-
