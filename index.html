@@ -231,7 +231,7 @@ async function apiCall(action, difficulty = 'medium', pId = null) {
  display.innerText = "🔄 Загрузка...";
  document.getElementById('result-wrapper').style.display = 'block';
  try {
-  const targetUrl = 'https://hisedu.app.n8n.cloud/webhook-test/6b2e1e97-a736-4593-9263-817bf345391f';
+  const targetUrl = 'https://hisedu.app.n8n.cloud/webhook/6b2e1e97-a736-4593-9263-817bf345391f';
   const finalPId = (action.includes('test') || action.includes('control')) ? (pId || 'N/A') : currentPId;
   const url =
   `${targetUrl}?id=${finalPId}&action=${action}&diff=${difficulty}&auth=${encodeURIComponent(tg.initData)}`;
@@ -273,3 +273,4 @@ if (window.Telegram && window.Telegram.WebApp) {
 </script>
 </body>
 </html>
+
