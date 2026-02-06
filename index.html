@@ -30,20 +30,20 @@ min-height: 100vh;
 .header { margin-bottom: 10px; }
 .header h1 { font-size: 20px; margin: 0; font-weight: 700; }
 .header p { color: var(--hint-color); font-size: 14px; margin-top: 4px; }
-button { /* */
-border: none; border-radius: 12px; padding: 12px 10px; font-size: 14px; /* */
-font-weight: 600; cursor: pointer; background-color: var(--buton-color); /* */
-color: var(--buton-text); transition: all 0.2s ease; /* */
+button {
+border: none; border-radius: 12px; padding: 12px 10px; font-size: 14px;
+font-weight: 600; cursor: pointer; background-color: var(--buton-color);
+color: var(--buton-text); transition: all 0.2s ease;
 }
-button:active { transform: scale(0.98); } /* */
-button:disabled { background-color: var(--hint-color); opacity: 0.6; cursor: not-allowed; } /* */
-.grid-buttons { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; } /* */
+button:active { transform: scale(0.98); }
+button:disabled { background-color: var(--hint-color); opacity: 0.6; cursor: not-allowed; }
+.grid-buttons { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
 #result-wrapper { display: none; background: var(--sec-bg); border-radius: 16px; padding: 16px; 
-margin-top: 20px; animation: fadeIn 0.3s ease; } /* */
-#result-text { font-size: 15px; white-space: pre-wrap; margin-bottom: 15px; } /* */
-.copy-btn { width: 100%; background-color: #34c759; } /* */
+margin-top: 20px; animation: fadeIn 0.3s ease; }
+#result-text { font-size: 15px; white-space: pre-wrap; margin-bottom: 15px; }
+.copy-btn { width: 100%; background-color: #34c759; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: 
-translateY(0); } } /* */
+translateY(0); } }
 
 /* Стилизация кнопок главного меню разными цветами */
 .btn-list { background-color: #007bff; color: white; }
@@ -52,30 +52,30 @@ translateY(0); } } /* */
 .btn-section { background-color: #6f42c1; color: white; }
 
 /* Стили для теста */
-.quiz-btn { /* */
- display: block; /* */
- width: 100%; /* */
- padding: 12px; /* */
- margin-bottom: 8px; /* */
- border: none; /* */
- border-radius: 8px; /* */
- background-color: var(--sec-bg); /* */
- color: var(--text-color); /* */
- text-align: left; /* */
- cursor: pointer; /* */
- transition: background-color 0.3s, color 0.3s; /* */
+.quiz-btn {
+ display: block;
+ width: 100%;
+ padding: 12px;
+ margin-bottom: 8px;
+ border: none;
+ border-radius: 8px;
+ background-color: var(--sec-bg);
+ color: var(--text-color);
+ text-align: left;
+ cursor: pointer;
+ transition: background-color 0.3s, color 0.3s;
 }
-.quiz-btn:hover { opacity: 0.9; } /* */
-.quiz-btn.correct { background-color: #4CAF50; color: white; } /* */
-.quiz-btn.incorrect { background-color: #f44336; color: white; } /* */
+.quiz-btn:hover { opacity: 0.9; }
+.quiz-btn.correct { background-color: #4CAF50; color: white; }
+.quiz-btn.incorrect { background-color: #f44336; color: white; }
 
-#explanation-area { /* */
- margin-top: 15px; /* */
- padding: 12px; /* */
- background-color: var(--hint-color); /* */
- border-radius: 8px; /* */
- display: none; /* */
- color: white; /* */
+#explanation-area {
+ margin-top: 15px;
+ padding: 12px;
+ background-color: var(--hint-color);
+ border-radius: 8px;
+ display: none;
+ color: white;
 }
 </style>
 </head>
@@ -85,9 +85,11 @@ translateY(0); } } /* */
 <div id="screen-main" class="screen-container">
     <div class="header"><h1>История для всех</h1><p>Выберите параграф</p></div>
     <button onclick="showScreen('screen-paragraph-list')" class="btn-list">📖 Выбери параграф (43 шт)</button>
-    <button onclick="showScreen('screen-test-difficulty')" class="btn-test">📝 Тест по истории</button>
-    <button onclick="apiCall('section_quiz', 'medium', '1-43')" class="final-quiz-btn">🏆 Итоговая контрольная работа</button>
+    <button onclick="showScreen('screen-easy-quiz-select')" class="btn-test">📝 Лёгкий тест</button>
+    <button onclick="showScreen('screen-hard-quiz-select')" class="btn-test">📝 Тяжёлый тест</button>
+    <!-- ПОРЯДОК ИЗМЕНЕН -->
     <button onclick="showScreen('screen-section-quiz')" class="btn-section">📚 Контрольная работа по разделам</button>
+    <button onclick="handleApiCall('section_quiz', 'medium', '1-43', 'Начать итоговую контрольную работу по всем параграфам (1-43)?')" class="final-quiz-btn">🏆 Итоговая контрольная работа</button>
 </div>
 
 <!-- ЭКРАН 2: Список параграфов (43 кнопки) -->
@@ -109,28 +111,29 @@ translateY(0); } } /* */
 <button onclick="apiCall('qa')">❓ Вопросы и ответы</button>
 </div>
 
-<!-- ЭКРАН 4: Выбор сложности теста и конкретного параграфа -->
-<div id="screen-test-difficulty" class="screen-container">
-    <button onclick="showScreen('screen-main')">← Назад в меню</button>
-    <div class="header"><h3>Выберите сложность теста и параграф</h3></div>
-    <button onclick="apiCall('test', 'easy')">🟩Лёгкий тест по всем параграфам</button>
-    <button onclick="apiCall('test', 'hard')">🟥Сложный тест по всем параграфам</button>
-
-    <div class="header" style="margin-top: 20px;"><h4>Лёгкий тест по конкретному параграфу</h4></div>
-    <div id="easy-quiz-buttons-grid" class="grid-buttons"></div>
-
-    <div class="header" style="margin-top: 20px;"><h4>Сложный тест по конкретному параграфу</h4></div>
-    <div id="hard-quiz-buttons-grid" class="grid-buttons"></div>
-</div>
-
-<!-- ЭКРАН 5: Выбор раздела для контрольной работы -->
+<!-- ЭКРАН 4: Выбор раздела для контрольной работы -->
 <div id="screen-section-quiz" class="screen-container">
     <button onclick="showScreen('screen-main')">← Назад в меню</button>
     <div class="header"><h3>Выберите раздел (параграфы)</h3></div>
-    <button onclick="apiCall('section_quiz', 'medium', '1-12')">Раздел I (Параграфы 1-12)</button>
-    <button onclick="apiCall('section_quiz', 'medium', '13-20')">Раздел II (Параграфы 13-20)</button>
-    <button onclick="apiCall('section_quiz', 'medium', '21-33')">Раздел III (Параграфы 21-33)</button>
-    <button onclick="apiCall('section_quiz', 'medium', '34-43')">Раздел IV (Параграфы 34-43)</button>
+    <!-- Добавлено подтверждение handleApiCall -->
+    <button onclick="handleApiCall('section_quiz', 'medium', '1-12', 'Начать контрольную работу по Разделу I (1-12)?')">Раздел I (Параграфы 1-12)</button>
+    <button onclick="handleApiCall('section_quiz', 'medium', '13-20', 'Начать контрольную работу по Разделу II (13-20)?')">Раздел II (Параграфы 13-20)</button>
+    <button onclick="handleApiCall('section_quiz', 'medium', '21-33', 'Начать контрольную работу по Разделу III (21-33)?')">Раздел III (Параграфы 21-33)</button>
+    <button onclick="handleApiCall('section_quiz', 'medium', '34-43', 'Начать контрольную работу по Разделу IV (34-43)?')">Раздел IV (Параграфы 34-43)</button>
+</div>
+
+<!-- ЭКРАН 6: Выбор параграфа для Лёгкого теста -->
+<div id="screen-easy-quiz-select" class="screen-container">
+    <button onclick="showScreen('screen-main')">← Назад в меню</button>
+    <div class="header"><h3>Лёгкий тест: Выберите параграф</h3></div>
+    <div id="easy-buttons-grid" class="grid-buttons"></div>
+</div>
+
+<!-- ЭКРАН 7: Выбор параграфа для Тяжёлого теста -->
+<div id="screen-hard-quiz-select" class="screen-container">
+    <button onclick="showScreen('screen-main')">← Назад в меню</button>
+    <div class="header"><h3>Тяжёлый тест: Выберите параграф</h3></div>
+    <div id="hard-buttons-grid" class="grid-buttons"></div>
 </div>
 
 
@@ -158,6 +161,14 @@ document.querySelector('.copy-btn').style.display = 'block'; // Показыва
 if (tg) tg.HapticFeedback.impactOccurred('light');
 }
 
+// --- ФУНКЦИЯ ПОДТВЕРЖДЕНИЯ ДЕЙСТВИЯ ---
+function handleApiCall(action, difficulty = 'medium', specificId = null, confirmText = 'Вы уверены, что хотите выполнить это действие?') {
+    if (confirm(confirmText)) {
+        apiCall(action, difficulty, specificId);
+    }
+}
+
+
 function generateParagraphButtons() {
 const grid = document.getElementById('paragraph-buttons-grid');
 for (let i = 1; i <= 43; i++) {
@@ -172,12 +183,13 @@ for (let i = 1; i <= 43; i++) {
 
 function generateQuizButtons(containerId, difficulty) {
     const grid = document.getElementById(containerId);
-    grid.innerHTML = ''; // Очищаем контейнер
+    if (!grid) return;
+    grid.innerHTML = '';
     for (let i = 1; i <= 43; i++) {
         const button = document.createElement('button');
         button.textContent = i;
-        // Кнопка вызывает apiCall напрямую с нужной сложностью и ID параграфа
-        button.onclick = () => apiCall('test', difficulty, i.toString()); 
+        // Кнопка вызывает handleApiCall напрямую с нужной сложностью и ID параграфа и текстом подтверждения
+        button.onclick = () => handleApiCall('test', difficulty, i.toString(), `Начать ${difficulty === 'easy' ? 'лёгкий' : 'тяжёлый'} тест по параграфу ${i}?`); 
         grid.appendChild(button);
     }
 }
@@ -302,8 +314,9 @@ tg = window.Telegram.WebApp;
 tg.expand();
 tg.ready();
 generateParagraphButtons();
-generateQuizButtons('easy-quiz-buttons-grid', 'easy');
-generateQuizButtons('hard-quiz-buttons-grid', 'hard');
+// Генерируем кнопки для новых экранов выбора сложности
+generateQuizButtons('easy-buttons-grid', 'easy');
+generateQuizButtons('hard-buttons-grid', 'hard');
 showScreen('screen-main'); 
 }
 </script>
