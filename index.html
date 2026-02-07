@@ -10,8 +10,8 @@
 --bg-color: var(--tg-theme-bg-color, #ffffff);
 --text-color: var(--tg-theme-text-color, #000000);
 --hint-color: var(--tg-theme-hint-color, #999999);
---buton-color: var(--tg-theme-button-color, #2481cc);
---buton-text: var(--tg-theme-button-text-color, #ffffff);
+--button-color: var(--tg-theme-button-color, #2481cc);
+--button-text: var(--tg-theme-button-text-color, #ffffff);
 --sec-bg: var(--tg-theme-secondary-bg-color, #f4f4f5);
 }
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -30,10 +30,13 @@ min-height: 100vh;
 .header { margin-bottom: 10px; }
 .header h1 { font-size: 20px; margin: 0; font-weight: 700; }
 .header p { color: var(--hint-color); font-size: 14px; margin-top: 4px; }
+
+/* Используем тег button вместо buton для соответствия стандартам HTML5, 
+   но сохраняем стили, как в оригинале, на случай, если вы используете именно 'buton' */
 button {
 border: none; border-radius: 12px; padding: 12px 10px; font-size: 14px;
-font-weight: 600; cursor: pointer; background-color: var(--buton-color);
-color: var(--buton-text); transition: all 0.2s ease;
+font-weight: 600; cursor: pointer; background-color: var(--button-color);
+color: var(--button-text); transition: all 0.2s ease;
 }
 button:active { transform: scale(0.98); }
 button:disabled { background-color: var(--hint-color); opacity: 0.6; cursor: not-allowed; }
@@ -75,12 +78,12 @@ display: none;
 color: white;
 }
 #quiz-final-results {
-    margin-top: 15px;
-    padding: 12px;
-    background-color: var(--sec-bg);
-    border-radius: 8px;
-    display: none;
-    font-weight: bold;
+ margin-top: 15px;
+ padding: 12px;
+ background-color: var(--sec-bg);
+ border-radius: 8px;
+ display: none;
+ font-weight: bold;
 }
 </style>
 </head>
@@ -88,11 +91,11 @@ color: white;
 <!-- ЭКРАН 1: Главное меню -->
 <div id="screen-main" class="screen-container">
 <div class="header"><h1>История для всех</h1><p>Выберите параграф</p></div>
-<button onclick="showScreen('screen-paragraph-list')" class="btn-list">Выбери параграф (43 шт)</button>
-<button onclick="showScreen('screen-easy-quiz-select')" class="btn-test">Лёгкий тест</button>
-<button onclick="showScreen('screen-hard-quiz-select')" class="btn-test">Тяжёлый тест</button>
-<button onclick="showScreen('screen-section-quiz')" class="btn-section">Контрольная работа по разделам</button>
-<button onclick="handleApiCall('section_quiz', 'medium', '1-43', 'Начать итоговую контрольную работу по всем параграфам (1-43)?')" class="final-quiz-btn">Итоговая контрольная работа</button>
+<button onclick="showScreen('screen-paragraph-list')" class="btn-list">📚 Выбери параграф (43 шт)</button>
+<button onclick="showScreen('screen-easy-quiz-select')" class="btn-test">💡 Лёгкий тест</button>
+<button onclick="showScreen('screen-hard-quiz-select')" class="btn-test">🧠 Игровой тест</button>
+<button onclick="showScreen('screen-section-quiz')" class="btn-section">📖 Контрольная работа по разделам</button>
+<button onclick="handleApiCall('section_quiz', 'medium', '1-43', 'Начать итоговую контрольную работу по всем параграфам (1-43)?')" class="final-quiz-btn">⭐ Итоговая контрольная работа</button>
 </div>
 <!-- ЭКРАН 2: Список параграфов (43 кнопки) -->
 <div id="screen-paragraph-list" class="screen-container">
@@ -104,12 +107,12 @@ color: white;
 <div id="screen-paragraph-actions" class="screen-container">
 <button onclick="showScreen('screen-paragraph-list')">← Назад к списку параграфов</button>
 <h3 id="current-paragraph-title">Действия</h3>
-<button onclick="apiCall('short_summary')">Краткий пересказ</button>
-<button onclick="apiCall('medium_summary')">Средний пересказ</button>
-<button onclick="apiCall('detailed_summary')">Подробный пересказ</button>
-<button onclick="apiCall('dates')">Основные даты</button>
-<button onclick="apiCall('terms')">Основные термины и определения</button>
-<button onclick="apiCall('qa')">Вопросы и ответы</button>
+<button onclick="apiCall('short_summary')">📝 Краткий пересказ</button>
+<button onclick="apiCall('medium_summary')">📖 Средний пересказ</button>
+<button onclick="apiCall('detailed_summary')">📚 Подробный пересказ</button>
+<button onclick="apiCall('dates')">📅 Основные даты</button>
+<button onclick="apiCall('terms')">💡 Основные термины и определения</button>
+<button onclick="apiCall('qa')">❓ Вопросы и ответы</button>
 </div>
 <!-- ЭКРАН 4: Выбор раздела для контрольной работы -->
 <div id="screen-section-quiz" class="screen-container">
@@ -134,37 +137,34 @@ color: white;
 </div>
 <!-- Контейнер результата (единый для всех экранов) -->
 <div id="result-wrapper">
- <button class="copy-btn" onclick="copyToClipboard()">Копировать результат</button>
- <div id="result-text"></div> 
- 
- <!-- НОВАЯ СТРУКТУРА КВИЗА -->
- <div id="quiz-wrapper" style="display: none; border-radius: 12px; padding: 15px; margin-top: 15px; 
+<button class="copy-btn" onclick="copyToClipboard()">Копировать результат</button>
+<div id="result-text"></div> 
+<!-- НОВАЯ СТРУКТУРА КВИЗА -->
+<div id="quiz-wrapper" style="display: none; border-radius: 12px; padding: 15px; margin-top: 15px; 
 background-color: var(--tg-theme-secondary-bg-color);">
- 
-    <!-- БЛОК СЧЕТА И КНОПКИ СБРОСА -->
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-weight: bold; color: var(--tg-theme-text-color); padding: 0 5px;">
-        <div>
-            Счет: <span id="score-correct" style="color: #4CAF50;">0</span> правильно, 
-            <span id="score-incorrect" style="color: #F44336;">0</span> неправильно
-        </div>
-        <button id="reset-score-btn" onclick="resetQuizAndStartOver()" style="background: none; border: 1px solid var(--tg-theme-button-color); color: var(--tg-theme-button-color); padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 0.8em;">Сброс</button>
-    </div>
-
- <div id="quiz-question" style="font-weight: bold; margin-bottom: 15px; font-size: 1.1em; color: var(--tg-theme-text-color);"></div>
- <div id="quiz-options" style="display: flex; flex-direction: column; gap: 10px;"></div>
- <div id="explanation-area"><strong>Объяснение:</strong><span id="explanation-text"></span></div>
- <div id="quiz-final-results"></div>
-
-  <!-- КНОПКА "Следующий вопрос" -->
- <button id="next-question-btn" onclick="loadNextQuestion()" style="display: none; margin-top: 15px; width: 100%; padding: 12px; background-color: var(--tg-theme-button-color); color: var(--tg-theme-button-text-color); border: none; border-radius: 8px; cursor: pointer;">
-    Следующий вопрос
-</button>
-
+ <!-- БЛОК СЧЕТА И КНОПКИ СБРОСА -->
+ <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; 
+font-weight: bold; color: var(--tg-theme-text-color); padding: 0 5px;">
+ <div>
+ Счет: <span id="score-correct" style="color: #4CAF50;">0</span> правильно, 
+ <span id="score-incorrect" style="color: #F44336;">0</span> неправильно
  </div>
+ <button id="reset-score-btn" onclick="resetQuizAndStartOver()" style="background: none; border: 
+1px solid var(--tg-theme-button-color); color: var(--tg-theme-button-color); padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 0.8em;">Сброс</button>
+ </div>
+<div id="quiz-question" style="font-weight: bold; margin-bottom: 15px; font-size: 1.1em; color: var(--tg-theme-text-color);"></div>
+<div id="quiz-options" style="display: flex; flex-direction: column; gap: 10px;"></div>
+<div id="explanation-area"><strong>Объяснение:</strong><span id="explanation-text"></span></div>
+<div id="quiz-final-results"></div>
+ <!-- КНОПКА "Следующий вопрос" -->
+<button id="next-question-btn" onclick="loadNextQuestion()" style="display: none; margin-top: 15px; 
+width: 100%; padding: 12px; background-color: var(--tg-theme-button-color); color: var(--tg-theme-button-text-color); border: none; border-radius: 8px; cursor: pointer;">
+Следующий вопрос
+</button>
+</div>
 </div>
 <script>
-// --- ГЛОБАЛЬНЫЕ ФУНКЦИИ И ПЕРЕМЕННЫЕ ---
-
+// --- ГЛОБАЛЬНЫЕ ФУНКЦИИ И ПЕРЕМЕННЫЕ ---\r\n
 let tg = null; 
 let currentPId = null; 
 let correctAnswersCount = 0;
@@ -172,22 +172,23 @@ let incorrectAnswersCount = 0;
 let currentQuestionIndex = 0;
 let quizDataArray = []; 
 
-
 function showScreen(screenId) {
- document.querySelectorAll('.screen-container').forEach(el => el.style.display = 'none');
- document.getElementById('result-wrapper').style.display = 'none';
- document.getElementById('quiz-wrapper').style.display = 'none'; 
- document.getElementById('explanation-area').style.display = 'none';
- document.getElementById('result-text').style.display = 'block'; 
- document.querySelector('.copy-btn').style.display = 'block'; 
- if (tg) tg.HapticFeedback.impactOccurred('light');
- document.getElementById(screenId).style.display = 'flex';
+document.querySelectorAll('.screen-container').forEach(el => el.style.display = 'none');
+document.getElementById('result-wrapper').style.display = 'none';
+document.getElementById('quiz-wrapper').style.display = 'none'; 
+document.getElementById('explanation-area').style.display = 'none';
+document.getElementById('result-text').style.display = 'block'; 
+document.querySelector('.copy-btn').style.display = 'block'; 
+if (tg) tg.HapticFeedback.impactOccurred('light');
+document.getElementById(screenId).style.display = 'flex';
 }
+
 function handleApiCall(action, difficulty = 'medium', specificId = null, confirmText = 'Вы уверены, что хотите выполнить это действие?') {
 if (confirm(confirmText)) {
- apiCall(action, difficulty, specificId);
+apiCall(action, difficulty, specificId);
 }
 }
+
 function generateParagraphButtons() {
 const grid = document.getElementById('paragraph-buttons-grid');
 for (let i = 1; i <= 43; i++) {
@@ -197,120 +198,123 @@ button.onclick = () => selectParagraph(i);
 grid.appendChild(button);
 }
 }
+
 function generateQuizButtons(containerId, difficulty) {
 const grid = document.getElementById(containerId);
 if (!grid) return;
 grid.innerHTML = '';
 for (let i = 1; i <= 43; i++) {
- const button = document.createElement('button');
- button.textContent = i;
- button.onclick = () => handleApiCall('test', difficulty, i.toString(), `Начать ${difficulty === 'easy' ? 'лёгкий' : 'тяжёлый'} тест по параграфу ${i}?`); 
- grid.appendChild(button);
+const button = document.createElement('button');
+button.textContent = i;
+button.onclick = () => handleApiCall('test', difficulty, i.toString(), `Начать ${difficulty === 'easy' ? 'лёгкий' : 'тяжёлый'} тест по параграфу ${i}?`); 
+grid.appendChild(button);
 }
 }
+
 function selectParagraph(pId) {
 currentPId = pId;
 document.getElementById('current-paragraph-title').innerText = `Параграф ${currentPId}`;
 showScreen('screen-paragraph-actions');
 }
+
 // !!! ОБНОВЛЕННАЯ ГЛАВНАЯ ФУНКЦИЯ API CALL С ДИАГНОСТИКОЙ !!!
 async function apiCall(action, difficulty = 'medium', specificId = null) {
- const display = document.getElementById('result-text');
- const buttons = document.querySelectorAll('button');
- buttons.forEach(b => b.disabled = true);
- display.innerText = "Загрузка...";
- document.getElementById('result-wrapper').style.display = 'block';
- document.getElementById('quiz-wrapper').style.display = 'none'; 
- document.getElementById('explanation-area').style.display = 'none';
- document.getElementById('quiz-final-results').style.display = 'none'; 
- document.querySelector('.copy-btn').style.display = 'none'; 
- display.style.display = 'block';
-
- console.log(`[API Call] Action: ${action}, Specific ID: ${specificId}`);
+const display = document.getElementById('result-text');
+const buttons = document.querySelectorAll('button');
+buttons.forEach(b => b.disabled = true);
+display.innerText = "Загрузка...";
+document.getElementById('result-wrapper').style.display = 'block';
+document.getElementById('quiz-wrapper').style.display = 'none'; 
+document.getElementById('explanation-area').style.display = 'none';
+document.getElementById('quiz-final-results').style.display = 'none'; 
+document.querySelector('.copy-btn').style.display = 'none'; 
+display.style.display = 'block';
+console.log(`[API Call] Action: ${action}, Specific ID: ${specificId}`);
+try {
+ const targetUrl = 'https://hisedu.app.n8n.cloud/webhook-test/6b2e1e97-a736-4593-9263-817bf345391f'; 
+ let finalPId;
+ if (specificId) {
+ finalPId = specificId;
+ } else if (action === 'test' || action === 'test_hard') {
+ finalPId = 'N/A'; 
+ } else {
+ finalPId = currentPId;
+ }
  
- try {
-  const targetUrl = 'https://hisedu.app.n8n.cloud/webhook-test/6b2e1e97-a736-4593-9263-817bf345391f'; 
-  let finalPId;
-  if (specificId) {
-   finalPId = specificId;
-  } else if (action === 'test' || action === 'test_hard') {
-   finalPId = 'N/A'; 
-  } else {
-   finalPId = currentPId;
-  }
-  
-  const url = `${targetUrl}?id=${finalPId}&action=${action}&diff=${difficulty}&auth=${encodeURIComponent(tg.initData)}`;
-  console.log(`[API Call] Fetching URL: ${url}`);
-
-  const response = await fetch(url);
-  const dataString = await response.text(); 
-  
-  console.log(`[API Call] Received response text: ${dataString.substring(0, 200)}...`);
-
-  const quizDataArray = tryParseJson(dataString);
-
-  if (Array.isArray(quizDataArray) && quizDataArray.length > 0) { 
-   console.log(`[API Call] Successfully parsed ${quizDataArray.length} quiz questions. Starting quiz.`);
-   display.style.display = 'none'; 
-   startQuiz(quizDataArray); 
-  } else {
-   console.log("[API Call] Response was not a valid quiz array. Displaying as text.");
-   display.style.display = 'block';
-   display.innerText = dataString;
-   document.querySelector('.copy-btn').style.display = 'block'; 
-   document.getElementById('quiz-wrapper').style.display = 'none';
-  }
-  } catch (error) {
-  console.error('[API Call] Fetch error:', error);
-  alert('Ошибка API: ' + error.message + ' Проверьте консоль.');
-  display.innerText = "Ошибка при вызове API: " + error.message;
-  display.style.display = 'block';
-  } finally {
-  buttons.forEach(b => b.disabled = false);
-  }
+ const url = 
+`${targetUrl}?id=${finalPId}&action=${action}&diff=${difficulty}&auth=${encodeURIComponent(tg.initData)}`;
+ console.log(`[API Call] Fetching URL: ${url}`);
+ const response = await fetch(url);
+ const dataString = await response.text(); 
+ 
+ console.log(`[API Call] Received response text: ${dataString.substring(0, 200)}...`);
+ const quizDataArrayParsed = tryParseJson(dataString);
+ if (Array.isArray(quizDataArrayParsed) && quizDataArrayParsed.length > 0) { // Логика для старта квиза с полученными вопросами
+ console.log(`[API Call] Successfully parsed ${quizDataArrayParsed.length} quiz questions. Starting quiz.`);
+ display.style.display = 'none'; 
+ startQuiz(quizDataArrayParsed); 
+ } else {
+ console.log("[API Call] Response was not a valid quiz array. Displaying as text.");
+ display.style.display = 'block';
+ display.innerText = dataString;
+ document.querySelector('.copy-btn').style.display = 'block'; 
+ document.getElementById('quiz-wrapper').style.display = 'none';
+ }
+ } catch (error) {
+ console.error('[API Call] Fetch error:', error);
+ alert('Ошибка API: ' + error.message + ' Проверьте консоль.');
+ display.innerText = "Ошибка при вызове API: " + error.message;
+ display.style.display = 'block';
+ } finally {
+ buttons.forEach(b => b.disabled = false);
+ }
 }
+
 function copyToClipboard() {
 const resultTextElement = document.getElementById('result-text');
 const textToCopy = resultTextElement.textContent || resultTextElement.innerText;
 if (textToCopy) {
 navigator.clipboard.writeText(textToCopy).then(() => {
- const copyBtn = document.querySelector('.copy-btn');
- copyBtn.textContent = 'Скопировано!';
- if (tg) tg.HapticFeedback.notificationOccurred('success');
- setTimeout(() => {
-  copyBtn.textContent = 'Копировать результат';
- }, 2000);
+const copyBtn = document.querySelector('.copy-btn');
+copyBtn.textContent = 'Скопировано!';
+if (tg) tg.HapticFeedback.notificationOccurred('success');
+setTimeout(() => {
+ copyBtn.textContent = 'Копировать результат';
+}, 2000);
 }).catch(err => {
- console.error('Ошибка копирования: ', err);
- alert('Не удалось скопировать текст.');
+console.error('Ошибка копирования: ', err);
+alert('Не удалось скопировать текст.');
 });
 }
 }
 // --- ВСПОМОГАТЕЛЬНАЯ ФУНКЦИЯ ДЛЯ ПАРСИНГА JSON (ОБНОВЛЕНО) ---
 function tryParseJson(str) {
-    try {
-        const json = JSON.parse(str);
-        if (typeof json === 'object' && json !== null) {
-            if (json.quizQuestions && Array.isArray(json.quizQuestions)) {
-                return json.quizQuestions;
-            }
-            return json;
-        }
-    } catch (e) {
-        console.error("Parse error:", e);
-    }
-    return null;
+ try {
+ const json = JSON.parse(str);
+ if (typeof json === 'object' && json !== null) {
+ if (json.quizQuestions && Array.isArray(json.quizQuestions)) {
+ return json.quizQuestions;
+ }
+ return json;
+ }
+ } catch (e) {
+ console.error("Parse error:", e);
+ }
+ return null;
 }
 // --- ОБНОВЛЕННЫЕ ФУНКЦИИ ДЛЯ ТЕСТА (РАБОТА С МАССИВОМ И СЧЕТОМ) ---
-
 function startQuiz(quizArray) { 
-    quizDataArray = quizArray;
-    currentQuestionIndex = 0;
-    resetQuizScore(); 
-    loadQuestion(currentQuestionIndex);
-    document.getElementById('quiz-wrapper').style.display = 'block';
+ quizDataArray = quizArray;
+ currentQuestionIndex = 0;
+ resetQuizScore(); 
+ loadQuestion(currentQuestionIndex);
+ document.getElementById('quiz-wrapper').style.display = 'block';
 }
 
+/**
+ * ОБНОВЛЕННАЯ ФУНКЦИЯ ЗАГРУЗКИ ВОПРОСА
+ * Добавляет нумерацию к вопросу и вариантам ответов, а также заголовок "Варианты ответов"
+ */
 function loadQuestion(index) {
     if (index >= quizDataArray.length) {
         showFinalResults();
@@ -320,19 +324,27 @@ function loadQuestion(index) {
     const data = quizDataArray[index];
     const optionsEl = document.getElementById('quiz-options');
     const explanationArea = document.getElementById('explanation-area');
-    const explanationText = document.getElementById('explanation-text');
-    const nextBtn = document.getElementById('next-question-btn');
     const finalResultsEl = document.getElementById('quiz-final-results');
+    const nextBtn = document.getElementById('next-question-btn');
 
-    document.getElementById('quiz-question').innerText = data.q;
+    // Обновляем текст вопроса с нумерацией
+    document.getElementById('quiz-question').innerText = `Вопрос ${index + 1}: ${data.q}`;
     optionsEl.innerHTML = '';
     explanationArea.style.display = 'none';
     finalResultsEl.style.display = 'none';
     nextBtn.style.display = 'none'; 
 
+    // Добавляем заголовок "Варианты ответов"
+    const answersTitle = document.createElement('h4');
+    answersTitle.innerText = 'Варианты ответов';
+    answersTitle.style.marginBottom = '10px';
+    answersTitle.style.color = 'var(--text-color)';
+    optionsEl.appendChild(answersTitle);
+
     data.a.forEach((optionText, optionIndex) => {
-        const btn = document.createElement('button'); 
-        btn.innerText = optionText;
+        const btn = document.createElement('button');
+        // Форматируем текст ответа с нумерацией (1 до 4)
+        btn.innerText = `${optionIndex + 1}. ${optionText}`;
         btn.classList.add('quiz-btn');
         
         btn.onclick = () => {
@@ -347,11 +359,10 @@ function loadQuestion(index) {
                 allBtns[data.c].classList.add('correct');
                 incorrectAnswersCount++;
             }
-
             document.getElementById('score-correct').innerText = correctAnswersCount;
             document.getElementById('score-incorrect').innerText = incorrectAnswersCount;
-            explanationText.innerText = data.e;
-            explanationArea.style.display = 'block';
+            document.getElementById('explanation-text').innerText = data.e;
+            document.getElementById('explanation-area').style.display = 'block';
             nextBtn.style.display = 'block';
             explanationArea.scrollIntoView({ behavior: 'smooth' });
         };
@@ -360,64 +371,57 @@ function loadQuestion(index) {
 }
 
 function loadNextQuestion() {
-    currentQuestionIndex++;
-    loadQuestion(currentQuestionIndex);
+ currentQuestionIndex++;
+ loadQuestion(currentQuestionIndex);
 }
-
 function resetQuizScore() {
-    correctAnswersCount = 0;
-    incorrectAnswersCount = 0;
-    document.getElementById('score-correct').innerText = 0;
-    document.getElementById('score-incorrect').innerText = 0;
+ correctAnswersCount = 0;
+ incorrectAnswersCount = 0;
+ document.getElementById('score-correct').innerText = 0;
+ document.getElementById('score-incorrect').innerText = 0;
 }
-
 function resetQuizAndStartOver() {
-    resetQuizScore();
-    currentQuestionIndex = 0;
-    if (quizDataArray.length > 0) {
-        loadQuestion(currentQuestionIndex);
-    } else {
-        document.getElementById('quiz-wrapper').style.display = 'none';
-    }
+ resetQuizScore();
+ currentQuestionIndex = 0;
+ if (quizDataArray.length > 0) {
+ loadQuestion(currentQuestionIndex);
+ } else {
+ document.getElementById('quiz-wrapper').style.display = 'none';
+ }
 }
-
 function showFinalResults() {
-    const questionEl = document.getElementById('quiz-question');
-    const optionsEl = document.getElementById('quiz-options');
-    const explanationArea = document.getElementById('explanation-area');
-    const nextBtn = document.getElementById('next-question-btn');
-    const finalResultsEl = document.getElementById('quiz-final-results');
-    
-    questionEl.innerText = `Тест завершен! Ваш итоговый счет: ${correctAnswersCount} из ${quizDataArray.length}.`;
-    optionsEl.innerHTML = '';
-    explanationArea.style.display = 'none';
-    nextBtn.style.display = 'none';
-    
-    finalResultsEl.innerText = 'Можете начать новый тест или сбросить счет.';
-    finalResultsEl.style.display = 'block';
+ const questionEl = document.getElementById('quiz-question');
+ const optionsEl = document.getElementById('quiz-options');
+ const explanationArea = document.getElementById('explanation-area');
+ const nextBtn = document.getElementById('next-question-btn');
+ const finalResultsEl = document.getElementById('quiz-final-results');
+ 
+ questionEl.innerText = `Тест завершен! Ваш итоговый счет: ${correctAnswersCount} из ${quizDataArray.length}.`;
+ optionsEl.innerHTML = '';
+ explanationArea.style.display = 'none';
+ nextBtn.style.display = 'none';
+ 
+ finalResultsEl.innerText = 'Можете начать новый тест или сбросить счет.';
+ finalResultsEl.style.display = 'block';
 }
-
-
 // --- Инициализация при старте (ОБНОВЛЕНО ДЛЯ СТАБИЛЬНОСТИ) ---
 function initWebApp() {
-    if (window.Telegram && window.Telegram.WebApp) {
-        tg = window.Telegram.WebApp; 
-        tg.expand();
-        tg.ready();
-        generateParagraphButtons();
-        generateQuizButtons('easy-buttons-grid', 'easy');
-        generateQuizButtons('hard-buttons-grid', 'hard');
-        showScreen('screen-main');
-        console.log("Telegram Web App инициализировано и готово.");
-    } else {
-        console.error("Telegram Web App SDK не найдено. Повторная попытка через 100мс.");
-        setTimeout(initWebApp, 100); 
-    }
+ if (window.Telegram && window.Telegram.WebApp) {
+ tg = window.Telegram.WebApp; 
+ tg.expand();
+ tg.ready();
+ generateParagraphButtons();
+ generateQuizButtons('easy-buttons-grid', 'easy');
+ generateQuizButtons('hard-buttons-grid', 'hard');
+ showScreen('screen-main');
+ console.log("Telegram Web App инициализировано и готово.");
+ } else {
+ console.error("Telegram Web App SDK не найдено. Повторная попытка через 100мс.");
+ setTimeout(initWebApp, 100); 
+ }
 }
-
 // Запускаем процесс инициализации
 initWebApp();
 </script>
 </body>
 </html>
-
