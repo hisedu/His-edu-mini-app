@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>His Edu App</title>
-<script src="https://telegram.org"></script>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
 :root {
 --bg-color: var(--tg-theme-bg-color, #ffffff);
@@ -210,7 +210,7 @@ async function apiCall(action, difficulty = 'medium', specificId = null) {
     display.style.display = 'block'; // Показываем текст загрузки
 
     try {
-        const targetUrl = 'https://hisedu.app.n8n.cloud'; 
+        const targetUrl = 'https://hisedu.app.n8n.cloud/webhook-test/6b2e1e97-a736-4593-9263-817bf345391f'; 
         
         let finalPId;
         if (specificId) {
@@ -336,3 +336,4 @@ showScreen('screen-main');
 </script>
 </body>
 </html>
+
