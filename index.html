@@ -118,20 +118,27 @@ color: white;
 <button onclick="handleApiCall('section_quiz', 'medium', '1-12', 'Начать контрольную работу по Разделу I (1-12)?')">Раздел I (Параграфы 1-12)</button>
 <button onclick="handleApiCall('section_quiz', 'medium', '13-20', 'Начать контрольную работу по Разделу II (13-20)?')">Раздел II (Параграфы 13-20)</button>
 <button onclick="handleApiCall('section_quiz', 'medium', '21-33', 'Начать контрольную работу по Разделу III (21-33)?')">Раздел III (Параграфы 21-33)</button>
-<button onclick="handleApiCall('section_quiz', 'medium', '34-43', 'Начать контрольную работу по Разделу IV (34-43)?')">Раздел IV (Параграфы 34-43)</button>
+<button onclick="handleApiCall('section_quiz', 'medium', '34-43', 'Начать контрольную работу по Разделу IV (34-43)?')">Раздел IV (34-43)</button>
 </div>
 <!-- ЭКРАН 6: Выбор параграфа для Лёгкого теста -->
 <div id="screen-easy-quiz-select" class="screen-container">
 <button onclick="showScreen('screen-main')">← Назад в меню</button>
-<div class="header"><h3>Лёгкий тест: Выберите параграф</h3></div>
 <div id="easy-buttons-grid" class="grid-buttons"></div>
 </div>
 <!-- ЭКРАН 7: Выбор параграфа для Тяжёлого теста -->
 <div id="screen-hard-quiz-select" class="screen-container">
 <button onclick="showScreen('screen-main')">← Назад в меню</button>
-<div class="header"><h3>Тяжёлый тест: Выберите параграф</h3></div>
 <div id="hard-buttons-grid" class="grid-buttons"></div>
 </div>
+
+<!-- НОВЫЙ ЭКРАН 8: Подтверждение начала теста -->
+<div id="screen-quiz-start-confirmation" class="screen-container">
+    <button id="back-from-quiz-confirm" onclick="showScreen('screen-main')">← Назад</button>
+    <h3 id="quiz-confirm-title">Подготовка к тесту</h3>
+    <p id="quiz-confirm-text">Начать тест по выбранному параграфу?</p>
+    <button onclick="startConfirmedTest()" class="final-quiz-btn" style="background-color: #007bff;">Начать тест</button>
+</div>
+
 <!-- Контейнер результата (единый для всех экранов) -->
 <div id="result-wrapper">
 <button class="copy-btn" onclick="copyToClipboard()">Копировать результат</button>
@@ -184,6 +191,32 @@ if (tg) tg.HapticFeedback.impactOccurred('light');
 document.getElementById(screenId).style.display = 'flex';
 }
 
+// ЭТА ФУНКЦИЯ ТЕПЕРЬ ОТВЕЧАЕТ ЗА ПЕРЕХОД НА ЭКРАН ПОДТВЕРЖДЕНИЯ ТЕСТА
+function selectQuizParagraph(pId, difficulty, action, returnScreenId) {
+    currentTestAction = action;
+    currentTestDifficulty = difficulty;
+    currentTestSpecificId = pId.toString();
+    currentPId = pId; // Также обновляем currentPId для универсальности
+    
+    document.getElementById('quiz-confirm-title').innerText = `${difficulty === 'easy' ? 'Лёгкий' : 'Тяжёлый'} тест: Параграф ${pId}`;
+    
+    // Определяем, куда возвращаться по кнопке "назад" на экране подтверждения
+    document.getElementById('back-from-quiz-confirm').onclick = () => showScreen(returnScreenId);
+
+    showScreen('screen-quiz-start-confirmation');
+}
+
+// НОВАЯ ФУНКЦИЯ: Запуск теста после подтверждения
+function startConfirmedTest() {
+    if (currentTestAction && currentTestSpecificId) {
+        apiCall(currentTestAction, currentTestDifficulty, currentTestSpecificId);
+    } else {
+        alert("Произошла ошибка при определении параметров теста.");
+        showScreen('screen-main');
+    }
+}
+
+
 function handleApiCall(action, difficulty = 'medium', specificId = null, confirmText = 'Вы уверены, что хотите выполнить это действие?') {
 if (confirm(confirmText)) {
 apiCall(action, difficulty, specificId);
@@ -200,14 +233,16 @@ grid.appendChild(button);
 }
 }
 
-function generateQuizButtons(containerId, difficulty) {
+// ОБНОВЛЕННАЯ ФУНКЦИЯ: вызывает selectQuizParagraph вместо apiCall напрямую
+function generateQuizButtons(containerId, difficulty, returnScreenId) {
 const grid = document.getElementById(containerId);
 if (!grid) return;
 grid.innerHTML = '';
 for (let i = 1; i <= 43; i++) {
 const button = document.createElement('button');
 button.textContent = i;
-button.onclick = () => handleApiCall('test', difficulty, i.toString(), `Начать ${difficulty === 'easy' ? 'лёгкий' : 'тяжёлый'} тест по параграфу ${i}?`); 
+// Теперь onclick вызывает промежуточный экран
+button.onclick = () => selectQuizParagraph(i, difficulty, 'test', returnScreenId); 
 grid.appendChild(button);
 }
 }
@@ -218,66 +253,53 @@ document.getElementById('current-paragraph-title').innerText = `Параграф
 showScreen('screen-paragraph-actions');
 }
 
-// !!! ОБНОВЛЕННАЯ ГЛАВНАЯ ФУНКЦИЯ API CALL С ИСПРАВЛЕННОЙ ЛОГИКОЙ ОТОБРАЖЕНИЯ И СОХРАНЕНИЕМ КОНТЕКСТА ТЕСТА !!!
+// !!! ГЛАВНАЯ ФУНКЦИЯ API CALL ОСТАЕТСЯ БЕЗ ИЗМЕНЕНИЙ В ЛОГИКЕ !!!
 async function apiCall(action, difficulty = 'medium', specificId = null) {
     const display = document.getElementById('result-text');
     const quizWrapper = document.getElementById('quiz-wrapper');
     const resultWrapper = document.getElementById('result-wrapper');
     const buttons = document.querySelectorAll('button');
     
-    // Блокируем кнопки и показываем загрузку
     buttons.forEach(b => b.disabled = true);
     display.innerText = "Загрузка...";
     resultWrapper.style.display = 'block';
-    quizWrapper.style.display = 'none'; // Скрываем квиз по умолчанию
+    quizWrapper.style.display = 'none'; 
     document.querySelector('.copy-btn').style.display = 'none'; 
     display.style.display = 'block';
 
-    console.log(`[API Call] Action: ${action}, Specific ID: ${specificId}`);
-
-    // --- Сохраняем контекст ТЕСТА перед вызовом API ---
     if (action.includes('test') || action.includes('quiz')) {
         currentTestAction = action;
         currentTestDifficulty = difficulty;
         currentTestSpecificId = specificId;
     } else {
-        // Сбрасываем контекст, если это не тест (например, пересказ)
         currentTestAction = null;
         currentTestDifficulty = null;
         currentTestSpecificId = null;
     }
-    // --- Конец сохранения контекста ---
 
     try {
         const targetUrl = 'https://hisedu.app.n8n.cloud/webhook-test/6b2e1e97-a736-4593-9263-817bf345391f'; 
         let finalPId = specificId || currentPId || 'N/A';
         
         const url = `${targetUrl}?id=${finalPId}&action=${action}&diff=${difficulty}&auth=${encodeURIComponent(tg.initData)}`;
-        console.log(`[API Call] Fetching URL: ${url}`);
         const response = await fetch(url);
         const dataString = await response.text(); 
         
-        console.log(`[API Call] Received response text: ${dataString.substring(0, 200)}...`);
         const quizDataArrayParsed = tryParseJson(dataString);
 
-        // Если данные успешно распознаны как массив вопросов для квиза (от 10 вопросов)
         if (Array.isArray(quizDataArrayParsed) && quizDataArrayParsed.length >= 10) { 
-            console.log(`[API Call] Successfully parsed ${quizDataArrayParsed.length} quiz questions. Starting quiz.`);
-            display.style.display = 'none'; // Скрываем текстовое поле с "Загрузкой..."
-            startQuiz(quizDataArrayParsed); // Запускаем квиз, который сам показывает quiz-wrapper
-            document.querySelector('.copy-btn').style.display = 'none'; // Убираем кнопку копирования для теста
+            display.style.display = 'none'; 
+            startQuiz(quizDataArrayParsed); 
+            document.querySelector('.copy-btn').style.display = 'none'; 
         } else {
-            // Иначе (если это пересказ параграфа или ошибка), показываем текст
-            console.log("[API Call] Response was not a valid quiz array. Displaying as text.");
             display.style.display = 'block';
             display.innerText = dataString;
             document.querySelector('.copy-btn').style.display = 'block'; 
-            quizWrapper.style.display = 'none'; // Убеждаемся, что контейнер квиза скрыт
+            quizWrapper.style.display = 'none'; 
         }
 
     } catch (error) {
-        console.error('[API Call] Fetch error:', error);
-        alert('Ошибка API: ' + error.message + ' Проверьте консоль.');
+        alert('Ошибка API: ' + error.message);
         display.innerText = "Ошибка при вызове API: " + error.message;
         display.style.display = 'block';
         quizWrapper.style.display = 'none';
@@ -315,7 +337,6 @@ function tryParseJson(str) {
  return json;
  }
  } catch (e) {
- console.error("Parse error:", e);
  }
  return null;
 }
@@ -325,8 +346,9 @@ function startQuiz(quizArray) {
  currentQuestionIndex = 0;
  resetQuizScore(); 
  loadQuestion(currentQuestionIndex);
+ // После начала теста скрываем экран подтверждения и показываем обертку теста
+ document.getElementById('screen-quiz-start-confirmation').style.display = 'none';
  document.getElementById('quiz-wrapper').style.display = 'block';
- // Убедимся, что кнопка "Новый тест" скрыта при начале нового теста
  const newTestBtn = document.getElementById('new-test-btn');
  if (newTestBtn) { newTestBtn.style.display = 'none'; }
 }
@@ -404,12 +426,10 @@ function resetQuizAndStartOver() {
  } else {
  document.getElementById('quiz-wrapper').style.display = 'none';
  }
- // Убедимся, что кнопка "Новый тест" скрыта при сбросе счета
  const newTestBtn = document.getElementById('new-test-btn');
  if (newTestBtn) { newTestBtn.style.display = 'none'; }
 }
 
-// --- НОВАЯ ФУНКЦИЯ ДЛЯ ПОВТОРНОГО ЗАПУСКА ТЕСТА С ДРУГИМИ ВОПРОСАМИ ---
 function startNewTestFromEnd() {
     if (currentTestAction && currentTestDifficulty) {
         apiCall(currentTestAction, currentTestDifficulty, currentTestSpecificId);
@@ -439,7 +459,6 @@ function showFinalResults() {
  finalResultsEl.innerText = 'Можете начать новый тест или сбросить счет.';
  finalResultsEl.style.display = 'block';
 
- // --- Добавляем кнопку "Новый тест" здесь ---
  let newTestBtn = document.getElementById('new-test-btn');
  if (!newTestBtn) {
   newTestBtn = document.createElement('button');
@@ -459,16 +478,14 @@ function initWebApp() {
  tg.expand();
  tg.ready();
  generateParagraphButtons();
- generateQuizButtons('easy-buttons-grid', 'easy');
- generateQuizButtons('hard-buttons-grid', 'hard');
+ // Передаем ID экрана возврата для правильной работы кнопки "назад"
+ generateQuizButtons('easy-buttons-grid', 'easy', 'screen-easy-quiz-select');
+ generateQuizButtons('hard-buttons-grid', 'hard', 'screen-hard-quiz-select');
  showScreen('screen-main');
- console.log("Telegram Web App инициализировано и готово.");
  } else {
- console.error("Telegram Web App SDK не найдено. Повторная попытка через 100мс.");
  setTimeout(initWebApp, 100); 
  }
 }
-// Запускаем процесс инициализации
 initWebApp();
 </script>
 </body>
