@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>His Edu App</title>
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://telegram.org"></script>
 <style>
 :root {
 --bg-color: var(--tg-theme-bg-color, #ffffff);
@@ -167,8 +167,6 @@ background-color: var(--tg-theme-secondary-bg-color);">
 
 let tg = null; 
 let currentPId = null; 
-
-// Глобальные переменные для отслеживания состояния квиза
 let correctAnswersCount = 0;
 let incorrectAnswersCount = 0;
 let currentQuestionIndex = 0;
@@ -183,6 +181,7 @@ function showScreen(screenId) {
  document.getElementById('result-text').style.display = 'block'; 
  document.querySelector('.copy-btn').style.display = 'block'; 
  if (tg) tg.HapticFeedback.impactOccurred('light');
+ document.getElementById(screenId).style.display = 'flex';
 }
 function handleApiCall(action, difficulty = 'medium', specificId = null, confirmText = 'Вы уверены, что хотите выполнить это действие?') {
 if (confirm(confirmText)) {
@@ -214,7 +213,7 @@ currentPId = pId;
 document.getElementById('current-paragraph-title').innerText = `Параграф ${currentPId}`;
 showScreen('screen-paragraph-actions');
 }
-// !!! ОБНОВЛЕННАЯ ГЛАВНАЯ ФУНКЦИЯ API CALL !!!
+// !!! ОБНОВЛЕННАЯ ГЛАВНАЯ ФУНКЦИЯ API CALL С ДИАГНОСТИКОЙ !!!
 async function apiCall(action, difficulty = 'medium', specificId = null) {
  const display = document.getElementById('result-text');
  const buttons = document.querySelectorAll('button');
@@ -226,8 +225,11 @@ async function apiCall(action, difficulty = 'medium', specificId = null) {
  document.getElementById('quiz-final-results').style.display = 'none'; 
  document.querySelector('.copy-btn').style.display = 'none'; 
  display.style.display = 'block';
+
+ console.log(`[API Call] Action: ${action}, Specific ID: ${specificId}`);
+ 
  try {
-  const targetUrl = 'https://hisedu.app.n8n.cloud/webhook-test/6b2e1e97-a736-4593-9263-817bf345391f'; 
+  const targetUrl = 'https://hisedu.app.n8n.cloud'; 
   let finalPId;
   if (specificId) {
    finalPId = specificId;
@@ -238,24 +240,29 @@ async function apiCall(action, difficulty = 'medium', specificId = null) {
   }
   
   const url = `${targetUrl}?id=${finalPId}&action=${action}&diff=${difficulty}&auth=${encodeURIComponent(tg.initData)}`;
+  console.log(`[API Call] Fetching URL: ${url}`);
+
   const response = await fetch(url);
   const dataString = await response.text(); 
   
-  // Используем tryParseJson, которая теперь умнее
+  console.log(`[API Call] Received response text: ${dataString.substring(0, 200)}...`);
+
   const quizDataArray = tryParseJson(dataString);
 
-  // Проверяем, что результат парсинга — это массив (все 50 вопросов)
   if (Array.isArray(quizDataArray) && quizDataArray.length > 0) { 
-   display.style.display = 'none'; // Скрываем текстовое поле
-   startQuiz(quizDataArray); // Передаем МАССИВ вопросов
+   console.log(`[API Call] Successfully parsed ${quizDataArray.length} quiz questions. Starting quiz.`);
+   display.style.display = 'none'; 
+   startQuiz(quizDataArray); 
   } else {
-   // Если это не массив вопросов, показываем как обычный текст
+   console.log("[API Call] Response was not a valid quiz array. Displaying as text.");
    display.style.display = 'block';
    display.innerText = dataString;
    document.querySelector('.copy-btn').style.display = 'block'; 
    document.getElementById('quiz-wrapper').style.display = 'none';
   }
   } catch (error) {
+  console.error('[API Call] Fetch error:', error);
+  alert('Ошибка API: ' + error.message + ' Проверьте консоль.');
   display.innerText = "Ошибка при вызове API: " + error.message;
   display.style.display = 'block';
   } finally {
@@ -284,11 +291,9 @@ function tryParseJson(str) {
     try {
         const json = JSON.parse(str);
         if (typeof json === 'object' && json !== null) {
-            // Если ответ содержит "quizQuestions" массив, возвращаем его
             if (json.quizQuestions && Array.isArray(json.quizQuestions)) {
                 return json.quizQuestions;
             }
-            // Иначе возвращаем сам объект (если это одиночный вопрос)
             return json;
         }
     } catch (e) {
@@ -298,7 +303,6 @@ function tryParseJson(str) {
 }
 // --- ОБНОВЛЕННЫЕ ФУНКЦИИ ДЛЯ ТЕСТА (РАБОТА С МАССИВОМ И СЧЕТОМ) ---
 
-// Функция для запуска квиза (вызывается после загрузки данных от n8n)
 function startQuiz(quizArray) { 
     quizDataArray = quizArray;
     currentQuestionIndex = 0;
@@ -307,7 +311,6 @@ function startQuiz(quizArray) {
     document.getElementById('quiz-wrapper').style.display = 'block';
 }
 
-// Функция загрузки конкретного вопроса по индексу
 function loadQuestion(index) {
     if (index >= quizDataArray.length) {
         showFinalResults();
@@ -321,12 +324,11 @@ function loadQuestion(index) {
     const nextBtn = document.getElementById('next-question-btn');
     const finalResultsEl = document.getElementById('quiz-final-results');
 
-    // Сброс UI для нового вопроса
     document.getElementById('quiz-question').innerText = data.q;
     optionsEl.innerHTML = '';
     explanationArea.style.display = 'none';
     finalResultsEl.style.display = 'none';
-    nextBtn.style.display = 'none'; // Скрываем кнопку "Следующий" пока не ответили
+    nextBtn.style.display = 'none'; 
 
     data.a.forEach((optionText, optionIndex) => {
         const btn = document.createElement('button'); 
@@ -350,20 +352,18 @@ function loadQuestion(index) {
             document.getElementById('score-incorrect').innerText = incorrectAnswersCount;
             explanationText.innerText = data.e;
             explanationArea.style.display = 'block';
-            nextBtn.style.display = 'block'; // Показываем кнопку "Следующий"
+            nextBtn.style.display = 'block';
             explanationArea.scrollIntoView({ behavior: 'smooth' });
         };
         optionsEl.appendChild(btn);
     });
 }
 
-// Функция для перехода к следующему вопросу
 function loadNextQuestion() {
     currentQuestionIndex++;
     loadQuestion(currentQuestionIndex);
 }
 
-// Функция для сброса счета (используется как часть resetQuizAndStartOver)
 function resetQuizScore() {
     correctAnswersCount = 0;
     incorrectAnswersCount = 0;
@@ -371,7 +371,6 @@ function resetQuizScore() {
     document.getElementById('score-incorrect').innerText = 0;
 }
 
-// Функция для сброса и перезапуска всего теста
 function resetQuizAndStartOver() {
     resetQuizScore();
     currentQuestionIndex = 0;
@@ -382,7 +381,6 @@ function resetQuizAndStartOver() {
     }
 }
 
-// Функция отображения финальных результатов (когда вопросы закончились)
 function showFinalResults() {
     const questionEl = document.getElementById('quiz-question');
     const optionsEl = document.getElementById('quiz-options');
@@ -400,16 +398,25 @@ function showFinalResults() {
 }
 
 
-// --- Инициализация при старте ---
-if (window.Telegram && window.Telegram.WebApp) {
-tg = window.Telegram.WebApp; 
-tg.expand();
-tg.ready();
-generateParagraphButtons();
-generateQuizButtons('easy-buttons-grid', 'easy');
-generateQuizButtons('hard-buttons-grid', 'hard');
-showScreen('screen-main'); 
+// --- Инициализация при старте (ОБНОВЛЕНО ДЛЯ СТАБИЛЬНОСТИ) ---
+function initWebApp() {
+    if (window.Telegram && window.Telegram.WebApp) {
+        tg = window.Telegram.WebApp; 
+        tg.expand();
+        tg.ready();
+        generateParagraphButtons();
+        generateQuizButtons('easy-buttons-grid', 'easy');
+        generateQuizButtons('hard-buttons-grid', 'hard');
+        showScreen('screen-main');
+        console.log("Telegram Web App инициализировано и готово.");
+    } else {
+        console.error("Telegram Web App SDK не найдено. Повторная попытка через 100мс.");
+        setTimeout(initWebApp, 100); 
+    }
 }
+
+// Запускаем процесс инициализации
+initWebApp();
 </script>
 </body>
 </html>
