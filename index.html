@@ -298,8 +298,9 @@ grid.innerHTML = '';
 for (let i = 1; i <= 43; i++) {
 const button = document.createElement('button');
 button.textContent = i;
-// Теперь onclick вызывает промежуточный экран
-button.onclick = () => selectQuizParagraph(i, difficulty, 'test', returnScreenId); 
+// Теперь onclick вызывает промежуточный экран с правильным параметром action
+const actionName = difficulty === 'hard' ? 'hard_test' : 'test'; // Определяем нужное действие
+button.onclick = () => selectQuizParagraph(i, difficulty, actionName, returnScreenId);
 grid.appendChild(button);
 }
 }
@@ -556,4 +557,5 @@ initWebApp();
 </script>
 </body>
 </html>
+
 
