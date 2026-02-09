@@ -21,6 +21,10 @@
   --dates-color: #ffc107;
   --terms-color: #6f42c1;
   --qa-color: #fd7e14;
+  --reference-color: #5a67d8; /* Фиолетово-синий для главной кнопки */
+  --reference-content-color: #007bff; /* Синий для содержания */
+  --reference-dynasty-color: #6f42c1; /* Фиолетовый для династии */
+  --reference-maps-color: #ffc107; /* Желтый для карт */
 }
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 body {
@@ -60,7 +64,13 @@ translateY(0); } }
 .btn-section { background-color: #6f42c1; color: white; }
 /* Новый класс для кнопки МЦКО */
 .btn-mcko { background-color: #e67e22; color: white; }
-
+.btn-reference { background-color: var(--reference-color); color: white; }
+/* Класс для кнопки "Содержание" */
+.btn-content { background-color: var(--reference-content-color); color: white; }
+/* Класс для кнопки "Династия Рюриковичей" */
+.btn-dynasty { background-color: var(--reference-dynasty-color); color: white; }
+/* Класс для кнопки "Исторические карты" */
+.btn-maps { background-color: var(--reference-maps-color); color: black; }
 /* Стили для теста */
 .quiz-btn {
   display: block;
@@ -135,7 +145,8 @@ translateY(0); } }
 <!-- НОВАЯ КНОПКА МЦКО -->
 <button onclick="alert('Функционал МЦКО пока в разработке!');" class="btn-mcko">🏫 Подготовка к тестированию МЦКО</button>
 </div>
-
+<button onclick="showScreen('screen-reference-materials')" class="btn-reference">📖 Справочные материалы</button>
+  
 <!-- ЭКРАН 2: Список параграфов (43 кнопки) -->
 <div id="screen-paragraph-list" class="screen-container">
 <button onclick="showScreen('screen-main')">← Назад</button>
@@ -186,7 +197,37 @@ translateY(0); } }
  <button onclick="startConfirmedTest()" class="final-quiz-btn" style="background-color: #007bff;">▶️ Начать тест</button>
 </div>
 
-<!-- Контейнер результата (единый для всех экранов) -->
+<!-- НОВЫЙ ЭКРАН 9: Справочные материалы (меню) -->
+<div id="screen-reference-materials" class="screen-container">
+<button onclick="showScreen('screen-main')">← Назад в меню</button>
+<div class="header"><h3>Справочные материалы</h3></div>
+<button onclick="showScreen('screen-textbook-content')" class="btn-content">📜 Содержание учебника по Истории России за 6 класс (автор В. Р. Мединский, А. В. Торкунов)</button>
+<button onclick="showScreen('screen-rurikovich-dynasty')" class="btn-dynasty">👑 Династия Рюриковичей в IX — начале XVI в.</button>
+<button onclick="showScreen('screen-historical-maps')" class="btn-maps">🗺️ Исторические карты</button>
+</div>
+
+<!-- НОВЫЙ ЭКРАН 10: Содержание учебника -->
+<div id="screen-textbook-content" class="screen-container">
+<button onclick="showScreen('screen-reference-materials')">← Назад к материалам</button>
+<div class="header"><h3>Содержание учебника по Истории России за 6 класс (автор В. Р. Мединский, А. В. Торкунов)</h3></div>
+<div id="textbook-content-display"></div>
+</div>
+
+<!-- НОВЫЙ ЭКРАН 11: Династия Рюриковичей -->
+<div id="screen-rurikovich-dynasty" class="screen-container">
+<button onclick="showScreen('screen-reference-materials')">← Назад к материалам</button>
+<div class="header"><h3>Династия Рюриковичей в IX — начале XVI в.</h3></div>
+<div id="rurikovich-dynasty-display"></div>
+</div>
+
+<!-- НОВЫЙ ЭКРАН 12: Исторические карты -->
+<div id="screen-historical-maps" class="screen-container">
+<button onclick="showScreen('screen-reference-materials')">← Назад к материалам</button>
+<div class="header"><h3>Исторические карты</h3></div>
+<div id="historical-maps-display"></div>
+</div>  
+
+  <!-- Контейнер результата (единый для всех экранов) -->
 <div id="result-wrapper">
 <button class="copy-btn" onclick="copyToClipboard()">Копировать результат</button>
 <div id="result-text"></div> 
@@ -229,14 +270,49 @@ let currentQuestionIndex = 0;
 let quizDataArray = []; 
 
 function showScreen(screenId) {
-  document.querySelectorAll('.screen-container').forEach(el => el.style.display = 'none');
-  document.getElementById('result-wrapper').style.display = 'none';
-  document.getElementById('quiz-wrapper').style.display = 'none'; 
-  document.getElementById('explanation-area').style.display = 'none';
-  document.getElementById('result-text').style.display = 'block'; 
-  document.querySelector('.copy-btn').style.display = 'block'; 
-  if (tg) tg.HapticFeedback.impactOccurred('light');
-  document.getElementById(screenId).style.display = 'flex';
+ document.querySelectorAll('.screen-container').forEach(el => el.style.display = 'none');
+ document.getElementById('result-wrapper').style.display = 'none';
+ document.getElementById('quiz-wrapper').style.display = 'none'; 
+ document.getElementById('explanation-area').style.display = 'none';
+ document.getElementById('result-text').style.display = 'block'; 
+ document.querySelector('.copy-btn').style.display = 'block'; 
+ if (tg) tg.HapticFeedback.impactOccurred('light');
+ document.getElementById(screenId).style.display = 'flex';
+
+ // НОВЫЙ КОД: Загрузка статичного текста для содержания учебника и заглушки для других разделов
+ if (screenId === 'screen-textbook-content') {
+   const contentEl = document.getElementById('textbook-content-display');
+   contentEl.innerText = "§ 1. Великое переселение народов. Восточная Европа и Северная Азия в 1-м тыс. н. э. (p. 1)\n" +
+                         "§ 2–3. Восточные славяне и их соседи (p. 1)\n" +
+                         "§ 4. Начало династии Рюриковичей (p. 1)\n" +
+                         "§ 5–6. Русь при Игоре, Ольге, Святославе (p. 1)\n" +
+                         "§ 7–8. Русь при Владимире Святом (p. 1)\n" +
+                         "§ 9. Расцвет Руси при Ярославе Мудром (p. 1)\n" +
+                         "§ 10–11. Наследники Ярослава Мудрого (p. 1)\n" +
+                         "§ 12. Русь при Владимире Мономахе (p. 1)\n" +
+                         "§ 13. Политическая раздробленность Руси (p. 1)\n" +
+                         "§ 14–15. Владимиро-Суздальская земля (p. 1)\n" +
+                         "§ 16–17. Новгородская земля (p. 1)\n" +
+                         "§ 18. Юго-Западная Русь (p. 1)\n" +
+                         "§ 19–20. Культура и быт в IX — начале XIII в. (p. 1)\n" +
+                         "§ 21. Чингисхан и его империя (p. 1)\n" +
+                         "§ 22–23. Натиск на русские земли с востока (p. 1)\n" +
+                         "§ 24–25. Отражение агрессии с запада (p. 1)\n" +
+                         "§ 26–27. Русские земли и Золотая Орда (p. 1)\n" +
+                         "§ 28–29. Русь и Великое княжество Литовское (p. 2)\n" +
+                         "§ 30. Северо-Восточная Русь в конце XIII — начале XIV в. (p. 2)\n" +
+                         "§ 31. Возвышение Москвы (p. 2)\n" +
+                         "§ 32–33. Победа на Куликовом поле (p. 2)\n" +
+                         "§ 34–35. Московское княжество в конце XIV — первой половине XV в. (p. 2)\n" +
+                         "§ 36–37. Иван III — государь всея Руси (p. 2)\n" +
+                         "§ 38–39. Российское государство и общество во второй половине XV в. (p. 2)\n" +
+                         "§ 40–41. Правление Василия III (p. 2)\n" +
+                         "§ 42–43. Культура во второй половине XIII — первой трети XVI в. (p. 2)";
+ } else if (screenId === 'screen-rurikovich-dynasty') {
+    document.getElementById('rurikovich-dynasty-display').innerText = "Здесь будет информация о династии Рюриковичей.";
+ } else if (screenId === 'screen-historical-maps') {
+    document.getElementById('historical-maps-display').innerText = "Здесь будут размещены исторические карты.";
+ }
 }
 
 // ЭТА ФУНКЦИЯ ТЕПЕРЬ ОТВЕЧАЕТ ЗА ПЕРЕХОД НА ЭКРАН ПОДТВЕРЖДЕНИЯ ТЕСТА
