@@ -257,11 +257,11 @@
         function startConfirmedTest() {
         if (currentTestAction && currentTestSpecificId) {
          apiCall(currentTestAction, currentTestDifficulty, currentTestSpecificId);
-        } else {
+        } else { 
          alert("Произошла ошибка при определении параметров теста.");
          showScreen('screen-main');
         }
-        }
+        } // <-- Здесь закрывается функция startConfirmedTest
         // НОВАЯ ФУНКЦИЯ: для контрольных работ по разделам (использует тот же экран подтверждения)
         function selectQuizSection(action, difficulty, specificId, titleText, returnScreenId) {
          currentTestAction = action;
@@ -579,4 +579,5 @@
     </script>
 </body>
 </html>
+
 
