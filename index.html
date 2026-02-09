@@ -38,7 +38,7 @@ body {
   flex-direction: column;
   min-height: 100vh;
 }
-.screen-container { display: none; flex-direction: column; gap: 10px; }
+.screen-container { display: none; flex-direction: column; gap: 20px; }
 .header { margin-bottom: 10px; }
 .header h1 { font-size: 20px; margin: 0; font-weight: 700; }
 .header p { color: var(--hint-color); font-size: 14px; margin-top: 4px; }
@@ -144,8 +144,8 @@ translateY(0); } }
 <button onclick="selectQuizSection('section_quiz', 'medium', '1-43', 'Итоговая контрольная работа', 'screen-main')" class="final-quiz-btn">🏆 Итоговая контрольная работа</button>
 <!-- НОВАЯ КНОПКА МЦКО -->
 <button onclick="alert('Функционал МЦКО пока в разработке!');" class="btn-mcko">🏫 Подготовка к тестированию МЦКО</button>
+<button onclick="showScreen('screen-reference-materials')" class="btn-reference">📖 Справочные материалы</button>  
 </div>
-<button onclick="showScreen('screen-reference-materials')" class="btn-reference">📖 Справочные материалы</button>
   
 <!-- ЭКРАН 2: Список параграфов (43 кнопки) -->
 <div id="screen-paragraph-list" class="screen-container">
@@ -633,5 +633,6 @@ initWebApp();
 </script>
 </body>
 </html>
+
 
 
