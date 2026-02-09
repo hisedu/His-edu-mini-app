@@ -402,6 +402,20 @@ document.getElementById('screen-quiz-start-confirmation').style.display = 'none'
 document.getElementById('quiz-wrapper').style.display = 'block';
 const newTestBtn = document.getElementById('new-test-btn');
 if (newTestBtn) { newTestBtn.style.display = 'none'; }
+// --- Добавленный код для кнопки "Вернуться в меню" ---
+let mainMenuBtn = document.getElementById('main-menu-btn');
+if (!mainMenuBtn) {
+mainMenuBtn = document.createElement('button');
+mainMenuBtn.id = 'main-menu-btn';
+mainMenuBtn.innerText = 'Вернуться в главное меню';
+mainMenuBtn.classList.add('final-quiz-btn'); // Используем существующий стиль
+mainMenuBtn.style.backgroundColor = '#6f42c1'; // Произвольный цвет из CSS
+mainMenuBtn.onclick = () => showScreen('screen-main');
+// Добавляем кнопку перед первым дочерним элементом, чтобы она была вверху
+document.getElementById('quiz-wrapper').insertBefore(mainMenuBtn, document.getElementById('quiz-wrapper').firstChild);
+}
+mainMenuBtn.style.display = 'block'; // Убеждаемся, что она видна
+// ----------------------------------------------------
 }
 /**
 * ОБНОВЛЕННАЯ ФУНКЦИЯ ЗАГРУЗКИ ВОПРОСА
@@ -508,6 +522,20 @@ if (!newTestBtn) {
  document.getElementById('quiz-wrapper').appendChild(newTestBtn); 
 }
 newTestBtn.style.display = 'block';
+// --- Добавленный код для кнопки "Вернуться в меню" ---
+let mainMenuBtn = document.getElementById('main-menu-btn');
+if (!mainMenuBtn) {
+mainMenuBtn = document.createElement('button');
+mainMenuBtn.id = 'main-menu-btn';
+mainMenuBtn.innerText = 'Вернуться в главное меню';
+mainMenuBtn.classList.add('final-quiz-btn'); // Переименованный класс для единообразия
+mainMenuBtn.style.backgroundColor = '#6f42c1'; // Произвольный цвет из CSS
+mainMenuBtn.onclick = () => showScreen('screen-main');
+// Добавляем кнопку в конец quiz-wrapper
+document.getElementById('quiz-wrapper').appendChild(mainMenuBtn);
+}
+mainMenuBtn.style.display = 'block';
+// ----------------------------------------------------  
 }
 // --- Инициализация при старте ---
 function initWebApp() {
@@ -528,3 +556,4 @@ initWebApp();
 </script>
 </body>
 </html>
+
