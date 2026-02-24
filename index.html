@@ -232,13 +232,19 @@ translateY(0); } }
     </div>
 </div>
 
-<!-- НОВЫЙ ЭКРАН 12: Исторические карты -->
-<div id="screen-historical-maps" class="screen-container">
-<button onclick="showScreen('screen-reference-materials')">← Назад к материалам</button>
-<div class="header"><h3>Исторические карты</h3></div>
-<div id="historical-maps-display"></div>
-</div>  
-
+<!-- ЭКРАН 12: Исторические карты -->
+<div id="screen-historical-maps" class="screen-container" style="display: none;">
+    <button onclick="showScreen('screen-reference-materials')" style="align-self: flex-start; margin-bottom: 15px; padding: 8px 15px; background: #eee; border: none; border-radius: 8px; cursor: pointer;">
+        ← Назад к материалам</button>
+        <div class="header" style="text-align: center; margin-bottom: 20px;">
+        <h3 style="margin: 0;">Исторические карты</h3>
+        <p style="font-size: 13px; color: #666; margin-top: 8px;"> ☝️ Нажмите на схему для увеличения (зума) и она откроется в хорошем качестве.</p>
+    </div>
+    <!-- Здесь JavaScript отрисует все 4 карты -->
+    <div id="historical-maps-display" style="width: 100%; display: flex; flex-direction: column; gap: 30px; padding-bottom: 40px;">
+    </div>
+</div>
+  
   <!-- Контейнер результата (единый для всех экранов) -->
 <div id="result-wrapper">
 <button class="copy-btn" onclick="copyToClipboard()">Копировать результат</button>
@@ -282,48 +288,91 @@ let currentQuestionIndex = 0;
 let quizDataArray = []; 
 
 function showScreen(screenId) {
- document.querySelectorAll('.screen-container').forEach(el => el.style.display = 'none');
- document.getElementById('result-wrapper').style.display = 'none';
- document.getElementById('quiz-wrapper').style.display = 'none'; 
- document.getElementById('explanation-area').style.display = 'none';
- document.getElementById('result-text').style.display = 'block'; 
- document.querySelector('.copy-btn').style.display = 'block'; 
- if (tg) tg.HapticFeedback.impactOccurred('light');
- document.getElementById(screenId).style.display = 'flex';
+    document.querySelectorAll('.screen-container').forEach(el => el.style.display = 'none');
+    document.getElementById('result-wrapper').style.display = 'none';
+    document.getElementById('quiz-wrapper').style.display = 'none'; 
+    document.getElementById('explanation-area').style.display = 'none';
+    document.getElementById('result-text').style.display = 'block'; 
+    document.querySelector('.copy-btn').style.display = 'block'; 
+    if (tg) tg.HapticFeedback.impactOccurred('light');
+    document.getElementById(screenId).style.display = 'flex';
 
- // НОВЫЙ КОД: Загрузка статичного текста для содержания учебника и заглушки для других разделов
- if (screenId === 'screen-textbook-content') {
-   const contentEl = document.getElementById('textbook-content-display');
-   contentEl.innerText = "§ 1. Великое переселение народов. Восточная Европа и Северная Азия в 1-м тыс. н. э. (p. 1)\n" +
-                         "§ 2–3. Восточные славяне и их соседи (p. 1)\n" +
-                         "§ 4. Начало династии Рюриковичей (p. 1)\n" +
-                         "§ 5–6. Русь при Игоре, Ольге, Святославе (p. 1)\n" +
-                         "§ 7–8. Русь при Владимире Святом (p. 1)\n" +
-                         "§ 9. Расцвет Руси при Ярославе Мудром (p. 1)\n" +
-                         "§ 10–11. Наследники Ярослава Мудрого (p. 1)\n" +
-                         "§ 12. Русь при Владимире Мономахе (p. 1)\n" +
-                         "§ 13. Политическая раздробленность Руси (p. 1)\n" +
-                         "§ 14–15. Владимиро-Суздальская земля (p. 1)\n" +
-                         "§ 16–17. Новгородская земля (p. 1)\n" +
-                         "§ 18. Юго-Западная Русь (p. 1)\n" +
-                         "§ 19–20. Культура и быт в IX — начале XIII в. (p. 1)\n" +
-                         "§ 21. Чингисхан и его империя (p. 1)\n" +
-                         "§ 22–23. Натиск на русские земли с востока (p. 1)\n" +
-                         "§ 24–25. Отражение агрессии с запада (p. 1)\n" +
-                         "§ 26–27. Русские земли и Золотая Орда (p. 1)\n" +
-                         "§ 28–29. Русь и Великое княжество Литовское (p. 2)\n" +
-                         "§ 30. Северо-Восточная Русь в конце XIII — начале XIV в. (p. 2)\n" +
-                         "§ 31. Возвышение Москвы (p. 2)\n" +
-                         "§ 32–33. Победа на Куликовом поле (p. 2)\n" +
-                         "§ 34–35. Московское княжество в конце XIV — первой половине XV в. (p. 2)\n" +
-                         "§ 36–37. Иван III — государь всея Руси (p. 2)\n" +
-                         "§ 38–39. Российское государство и общество во второй половине XV в. (p. 2)\n" +
-                         "§ 40–41. Правление Василия III (p. 2)\n" +
-                         "§ 42–43. Культура во второй половине XIII — первой трети XVI в. (p. 2)";
- } else if (screenId === 'screen-rurikovich-dynasty') {
- } else if (screenId === 'screen-historical-maps') {
-    document.getElementById('historical-maps-display').innerText = "Здесь будут размещены исторические карты.";
- }
+    // 1. Содержание учебника
+    if (screenId === 'screen-textbook-content') {
+        const contentEl = document.getElementById('textbook-content-display');
+        contentEl.innerText = "§ 1. Великое переселение народов. Восточная Европа и Северная Азия в 1-м тыс. н. э. (p. 1)\n" +
+                              "§ 2–3. Восточные славяне и их соседи (p. 1)\n" +
+                              "§ 4. Начало династии Рюриковичей (p. 1)\n" +
+                              "§ 5–6. Русь при Игоре, Ольге, Святославе (p. 1)\n" +
+                              "§ 7–8. Русь при Владимире Святом (p. 1)\n" +
+                              "§ 9. Расцвет Руси при Ярославе Мудром (p. 1)\n" +
+                              "§ 10–11. Наследники Ярослава Мудрого (p. 1)\n" +
+                              "§ 12. Русь при Владимире Мономахе (p. 1)\n" +
+                              "§ 13. Политическая раздробленность Руси (p. 1)\n" +
+                              "§ 14–15. Владимиро-Суздальская земля (p. 1)\n" +
+                              "§ 16–17. Новгородская земля (p. 1)\n" +
+                              "§ 18. Юго-Западная Русь (p. 1)\n" +
+                              "§ 19–20. Культура и быт в IX — начале XIII в. (p. 1)\n" +
+                              "§ 21. Чингисхан и его империя (p. 1)\n" +
+                              "§ 22–23. Натиск на русские земли с востока (p. 1)\n" +
+                              "§ 24–25. Отражение агрессии с запада (p. 1)\n" +
+                              "§ 26–27. Русские земли и Золотая Орда (p. 1)\n" +
+                              "§ 28–29. Русь и Великое княжество Литовское (p. 2)\n" +
+                              "§ 30. Северо-Восточная Русь в конце XIII — начале XIV в. (p. 2)\n" +
+                              "§ 31. Возвышение Москвы (p. 2)\n" +
+                              "§ 32–33. Победа на Куликовом поле (p. 2)\n" +
+                              "§ 34–35. Московское княжество в конце XIV — первой половине XV в. (p. 2)\n" +
+                              "§ 36–37. Иван III — государь всея Руси (p. 2)\n" +
+                              "§ 38–39. Российское государство и общество во второй половине XV в. (p. 2)\n" +
+                              "§ 40–41. Правление Василия III (p. 2)\n" +
+                              "§ 42–43. Культура во второй половине XIII — первой трети XVI в. (p. 2)";
+    } 
+    // 2. Династия Рюриковичей
+    else if (screenId === 'screen-rurikovich-dynasty') {
+        // Здесь ваша логика для династии
+    } 
+    // 3. ИСТОРИЧЕСКИЕ КАРТЫ (ОБНОВЛЕНО)
+    else if (screenId === 'screen-historical-maps') {
+        const mapsDisplayEl = document.getElementById('historical-maps-display');
+        mapsDisplayEl.innerHTML = ''; // Очищаем контейнер
+
+        const mapsData = [
+            { title: "Русь в IX–X вв.", file: "map1.jpg" },
+            { title: "Русь в конце X — XI в.", file: "map2.jpg" },
+            { title: "Русь в период раздробленности. 30-е гг. XII в. - первая четверть XIII в.", file: "map3.jpg" },
+            { title: "Нашествие на Русь с востока и запада", file: "map4.jpg" }
+        ];
+
+        mapsData.forEach(item => {
+            const mapWrapper = document.createElement('div');
+            mapWrapper.style.marginBottom = '30px';
+
+            // Название карты
+            const title = document.createElement('h4');
+            title.innerText = item.title;
+            title.style.margin = '0 0 10px 0';
+            title.style.fontSize = '15px';
+            title.style.color = 'var(--tg-theme-text-color, #000)';
+
+            // Ссылка для зума
+            const link = document.createElement('a');
+            link.href = `https://github.com/hisedu/images/blob/main/${item.file}?raw=true`;
+            link.target = '_blank';
+
+            // Картинка
+            const img = document.createElement('img');
+            img.src = `https://github.com/hisedu/images/blob/main/${item.file}?raw=true`;
+            img.style.width = '100%';
+            img.style.borderRadius = '10px';
+            img.style.boxShadow = '0 4px 10px rgba(0,0,0,0.1)';
+            img.style.display = 'block';
+
+            link.appendChild(img);
+            mapWrapper.appendChild(title);
+            mapWrapper.appendChild(link);
+            mapsDisplayEl.appendChild(mapWrapper);
+        });
+    }
 }
 
 // ЭТА ФУНКЦИЯ ТЕПЕРЬ ОТВЕЧАЕТ ЗА ПЕРЕХОД НА ЭКРАН ПОДТВЕРЖДЕНИЯ ТЕСТА
@@ -644,6 +693,7 @@ initWebApp();
 </script>
 </body>
 </html>
+
 
 
 
