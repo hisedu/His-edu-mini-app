@@ -218,7 +218,7 @@ translateY(0); } }
     <button onclick="showScreen('screen-reference-materials')">← Назад к материалам</button>
     <div class="header">
         <h3>Династия Рюриковичей в IX — начале XVI в.</h3>
-        <p style="font-size: 12px; color: var(--hint-color); margin-top: 4px;">👆 Нажмите на схему для увеличения (зума)</p>
+        <p style="font-size: 12px; color: var(--hint-color); margin-top: 4px;">👆 Нажмите на схему для увеличения (зума) и она откроется в хорошем качестве.</p>
     </div>
     
     <div id="rurikovich-dynasty-display" style="text-align: center; padding-bottom: 20px;">
@@ -234,7 +234,7 @@ translateY(0); } }
 
 <!-- ЭКРАН 12: Исторические карты -->
 <div id="screen-historical-maps" class="screen-container" style="display: none;">
-    <button onclick="showScreen('screen-reference-materials')" style="align-self: flex-start; margin-bottom: 15px; padding: 8px 15px; background: #eee; border: none; border-radius: 8px; cursor: pointer;">
+    <button onclick="showScreen('screen-reference-materials')" style="align-self: flex-start; margin-bottom: 15px; padding: 10px 20px; background-color: #007AFF; color: #ffffff; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; font-family: inherit;">
         ← Назад к материалам</button>
         <div class="header" style="text-align: center; margin-bottom: 20px;">
         <h3 style="margin: 0;">Исторические карты</h3>
@@ -383,7 +383,7 @@ function selectQuizParagraph(pId, difficulty, action, returnScreenId) {
  currentPId = pId; // Также обновляем currentPId для универсальности
  
  document.getElementById('quiz-confirm-title').innerText = `${difficulty === 'easy' ? 'Лёгкий' : 
-'Тяжёлый'} тест: Параграф ${pId}`;
+'Тяжёлый'} тест: Параграф ${pId}(10 вопросов)`;
 
  // Определяем, куда возвращаться по кнопке "назад" на экране подтверждения
  document.getElementById('back-from-quiz-confirm').onclick = () => showScreen(returnScreenId);
@@ -693,6 +693,7 @@ initWebApp();
 </script>
 </body>
 </html>
+
 
 
 
