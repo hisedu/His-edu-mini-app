@@ -363,12 +363,12 @@ function showScreen(screenId) {
 
             // Ссылка для зума
             const link = document.createElement('a');
-            link.href = `https://github.com/hisedu/images/blob/main/${item.file}?raw=true`;
+            link.href = `https://cdn.jsdelivr.net/gh/hisedu/images@main/${item.file}`;
             link.target = '_blank';
 
             // Картинка
             const img = document.createElement('img');
-            img.src = `https://github.com/hisedu/images/blob/main/${item.file}?raw=true`;
+            img.src = `https://cdn.jsdelivr.net/gh/hisedu/images@main/${item.file}`;
             img.style.width = '100%';
             img.style.borderRadius = '10px';
             img.style.boxShadow = '0 4px 10px rgba(0,0,0,0.1)';
@@ -705,6 +705,7 @@ initWebApp();
 </script>
 </body>
 </html>
+
 
 
 
