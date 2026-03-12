@@ -553,43 +553,45 @@ async function apiCall(action, difficulty = 'medium', specificId = null) {
   `${targetUrl}?id=${finalPId}&action=${action}&diff=${difficulty}&auth=${encodeURIComponent(tg.initData)}`;
   const response = await fetch(url);
   const dataString = await response.text(); 
-  
-  const quizDataArrayParsed = tryParseJson(dataString);
-  if (Array.isArray(quizDataArrayParsed) && quizDataArrayParsed.length >= 10) { 
-  display.style.display = 'none'; 
-  startQuiz(quizDataArrayParsed); 
-  document.querySelector('.copy-btn').style.display = 'none'; 
+    const quizDataArrayParsed = tryParseJson(dataString);
+    if (Array.isArray(quizDataArrayParsed) && quizDataArrayParsed.length >= 10) { 
+      display.style.display = 'none'; 
+      startQuiz(quizDataArrayParsed); 
+      document.querySelector('.copy-btn').style.display = 'none'; 
   } else {
-  display.style.display = 'block';
-  display.innerText = dataString;
-  document.querySelector('.copy-btn').style.display = 'block';
-    // ПРОВЕРКА: Показываем кнопку только если опрос еще не пройден
-        if (!localStorage.getItem('survey_completed')) {
-            let apiSurveyBtn = document.getElementById('api-survey-btn');
-            if (!apiSurveyBtn) {
-                apiSurveyBtn = document.createElement('button');
-                apiSurveyBtn.id = 'api-survey-btn';
-                apiSurveyBtn.innerText = '📝 Помочь проекту (Опрос)';
-                apiSurveyBtn.classList.add('final-quiz-btn');
-                apiSurveyBtn.style.width = '100%';
-                apiSurveyBtn.style.marginTop = '10px';
-                apiSurveyBtn.style.backgroundColor = '#34c759';
-                apiSurveyBtn.onclick = () => showScreen('screen-survey');
-                document.getElementById('result-wrapper').appendChild(apiSurveyBtn);
-                }
-      apiSurveyBtn.style.display = 'block';
-      quizWrapper.style.display = 'none'; 
-        }
-    }
-  } catch (error) {
-  alert('Ошибка API: ' + error.message);
-  display.innerText = "Ошибка при вызове API: " + error.message;
-  display.style.display = 'block';
-  quizWrapper.style.display = 'none';
-  document.querySelector('.copy-btn').style.display = 'none';
-  } finally {
-  buttons.forEach(b => b.disabled = false);
-  }
+      display.style.display = 'block';
+      display.innerText = dataString;
+      document.querySelector('.copy-btn').style.display = 'block';
+      
+      // Скрываем обертку квиза, так как пришел текст
+      if (quizWrapper) quizWrapper.style.display = 'none'; 
+
+      // ПРОВЕРКА: Показываем кнопку только если опрос еще не пройден
+      if (!localStorage.getItem('survey_completed')) {
+          let apiSurveyBtn = document.getElementById('api-survey-btn');
+          if (!apiSurveyBtn) {
+              apiSurveyBtn = document.createElement('button');
+              apiSurveyBtn.id = 'api-survey-btn';
+              apiSurveyBtn.innerText = '📝 Помочь проекту (Опрос)';
+              apiSurveyBtn.classList.add('final-quiz-btn');
+              apiSurveyBtn.style.width = '100%';
+              apiSurveyBtn.style.marginTop = '10px';
+              apiSurveyBtn.style.backgroundColor = '#34c759';
+              apiSurveyBtn.onclick = () => showScreen('screen-survey');
+              document.getElementById('result-wrapper').appendChild(apiSurveyBtn);
+          }
+          apiSurveyBtn.style.display = 'block';
+      }
+  } // Закрывает else
+} catch (error) { // ЗАКРЫВАЕТ try и НАЧИНАЕТ catch
+    alert('Ошибка API: ' + error.message);
+    display.innerText = "Ошибка при вызове API: " + error.message;
+    display.style.display = 'block';
+    if (quizWrapper) quizWrapper.style.display = 'none';
+    document.querySelector('.copy-btn').style.display = 'none';
+} finally {
+    buttons.forEach(b => b.disabled = false);
+}
 }
 function copyToClipboard() {
 const resultTextElement = document.getElementById('result-text');
@@ -858,6 +860,7 @@ async function sendSurveyData() {
 </script>
 </body>
 </html>
+
 
 
 
