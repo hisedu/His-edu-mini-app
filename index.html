@@ -781,9 +781,10 @@ async function sendSurveyData() {
     const formData = new FormData(form);
     const btn = document.getElementById('submit-survey-btn');
 
-    // Собираем данные
+       // Собираем данные ПЛЮС добавляем auth
     const params = new URLSearchParams({
         "action": "survey",
+        "auth": tg.initData, // ВАЖНО: передаем сырые данные для проверки в n8n
         "userId": tg.initDataUnsafe?.user?.id || 'unknown',
         "username": tg.initDataUnsafe?.user?.username || 'anonymous',
         "feature": formData.get('best_feature'),
@@ -818,6 +819,7 @@ async function sendSurveyData() {
 </script>
 </body>
 </html>
+
 
 
 
