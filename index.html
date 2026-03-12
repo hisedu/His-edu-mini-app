@@ -144,7 +144,8 @@ translateY(0); } }
 <button onclick="selectQuizSection('section_quiz', 'medium', '1-43', 'Итоговая контрольная работа', 'screen-main')" class="final-quiz-btn">🏆 Итоговая контрольная работа</button>
 <!-- НОВАЯ КНОПКА МЦКО -->
 <button onclick="alert('Функционал ВПР/МЦКО пока в разработке!');" class="btn-mcko">🏫 Подготовка к тестированию ВПР/МЦКО</button>
-<button onclick="showScreen('screen-reference-materials')" class="btn-reference">📖 Справочные материалы</button>  
+<button onclick="showScreen('screen-reference-materials')" class="btn-reference">📖 Справочные материалы</button> 
+<button onclick="showScreen('screen-survey')" class="btn-mcko" style="margin-top: 10px; background-color: #6f42c1;">📝 Пройдите опрос</button>
 </div>
   
 <!-- ЭКРАН 2: Список параграфов (43 кнопки) -->
@@ -273,7 +274,69 @@ width: 100%; padding: 12px; background-color: var(--tg-theme-button-color); colo
 </button>
 </div>
 </div>
+<!-- ЭКРАН ОПРОСА (Вставлять ПЕРЕД тегом <script>) -->
+<div id="screen-survey" class="screen-container" style="display: none; padding: 20px;">
+    <button onclick="showScreen('screen-main')" style="margin-bottom: 15px;">← Назад</button>
+    
+    <div style="width: 100%; background: var(--bg-color); height: 8px; border-radius: 10px; margin-bottom: 20px; overflow: hidden; border: 1px solid var(--hint-color);">
+        <div id="survey-progress" style="width: 0%; height: 100%; background: #34c759; transition: width 0.3s ease;"></div>
+    </div>
 
+    <form id="survey-form" onchange="updateProgress()" style="display: flex; flex-direction: column; gap: 15px; background: var(--sec-bg); padding: 16px; border-radius: 16px;">
+        <label>1. Что самое полезное?
+            <select name="best_feature" required style="width:100%; padding:8px; margin-top:5px; border-radius:8px;">
+                <option value="" disabled selected>Выберите...</option>
+                <option value="Пересказы">Пересказы</option>
+                <option value="Тесты">Тесты</option>
+                <option value="Карты">Карты</option>
+                <option value="Даты">Даты</option>
+                <option value="Контрольные">Контрольные</option>
+            </select>
+        </label>
+
+        <label>2. Как часто заходите?
+            <select name="usage_freq" required style="width:100%; padding:8px; margin-top:5px; border-radius:8px;">
+                <option value="" disabled selected>Выберите...</option>
+                <option value="Ежедневно">Ежедневно</option>
+                <option value="Перед уроком">Перед уроком</option>
+                <option value="Редко">Редко</option>
+                <option value="Первый раз">Первый раз</option>
+            </select>
+        </label>
+
+        <label>3. Останетесь при лимите на тесты (2/день)?
+            <select name="limit_tests" required style="width:100%; padding:8px; margin-top:5px; border-radius:8px;">
+                <option value="Да">Да</option>
+                <option value="Нет">Нет</option>
+            </select>
+        </label>
+
+        <label>4. Останетесь при лимите на ВСЁ (2/день)?
+            <select name="limit_all" required style="width:100%; padding:8px; margin-top:5px; border-radius:8px;">
+                <option value="Да">Да</option>
+                <option value="Нет">Нет</option>
+            </select>
+        </label>
+
+        <label>5. Как удобнее платить?
+            <select name="payment_model" required style="width:100%; padding:8px; margin-top:5px; border-radius:8px;">
+                <option value="Разово">Разово (19₽)</option>
+                <option value="Подписка">Подписка (149₽/мес)</option>
+                <option value="Звезды">Звёзды ⭐️</option>
+                <option value="Реклама">Реклама</option>
+            </select>
+        </label>
+
+        <textarea name="feedback" rows="3" oninput="updateProgress()" placeholder="Чего не хватает? За что бы вы заплатили?" style="width:100%; padding:8px; border-radius:8px;"></textarea>
+
+        <div style="font-size: 11px; color: var(--hint-color); line-height: 1.2;">
+            Развитие приложения без вложений невозможно (сервера, нейросети). Помогите нам найти путь развития. 🙏
+        </div>
+
+        <button type="button" id="submit-survey-btn" onclick="sendSurveyData()" class="final-quiz-btn" style="background: #34c759; color: white; padding: 12px; border-radius: 12px; border: none; font-weight: bold;">Отправить ответы</button>
+    </form>
+</div>
+  
 <script>
 // --- ГЛОБАЛЬНЫЕ ФУНКЦИИ И ПЕРЕМЕННЫЕ ---
 const sectionQuestionsCount = {
@@ -480,7 +543,7 @@ async function apiCall(action, difficulty = 'medium', specificId = null) {
   currentTestSpecificId = null;
  }
  try {
-  const targetUrl = 'https://hisedu.app.n8n.cloud/webhook/6b2e1e97-a736-4593-9263-817bf345391f'; 
+  const targetUrl = 'https://hisedu.app.n8n.cloud/webhook-test/6b2e1e97-a736-4593-9263-817bf345391f'; 
   let finalPId = specificId || currentPId || 'N/A';
  
   const url = 
@@ -702,9 +765,69 @@ setTimeout(initWebApp, 100);
 }
 }
 initWebApp();
+  // Логика опроса
+function updateProgress() {
+    const form = document.getElementById('survey-form');
+    if (!form) return;
+    const fields = form.querySelectorAll('select, textarea');
+    let filled = 0;
+    fields.forEach(f => { if (f.value && f.value !== "") filled++; });
+    const progress = document.getElementById('survey-progress');
+    if (progress) progress.style.width = (filled / fields.length * 100) + '%';
+}
+async function sendSurveyData() {
+    const tg = window.Telegram.WebApp;
+    const user = tg.initDataUnsafe?.user; // Получаем данные реального юзера
+    
+    const form = document.getElementById('survey-form');
+    const formData = new FormData(form);
+    const btn = document.getElementById('submit-survey-btn');
+
+    // Собираем параметры для GET запроса
+    const params = new URLSearchParams({
+        "action": "survey",
+        "auth": tg.initData, // Для узла Code
+        "userId": user?.id || "no_id", 
+        "username": user?.username || "no_name",
+        "feature": formData.get('best_feature'),
+        "freq": formData.get('usage_freq'),
+        "limTest": formData.get('limit_tests'),
+        "limAll": formData.get('limit_all'),
+        "pay": formData.get('payment_model'),
+        "text": formData.get('feedback')
+    });
+
+    btn.disabled = true;
+    btn.innerText = "Отправка...";
+
+    try {
+        // ОБЯЗАТЕЛЬНО проверьте, что здесь ваш актуальный TEST URL из n8n
+        const response = await fetch(`https://hisedu.app.n8n.cloud/webhook-test/6b2e1e97-a736-4593-9263-817bf345391f`);
+
+        if (response.ok) {
+            alert('Спасибо! Ваши ответы приняты.');
+            showScreen('screen-main');
+            form.reset();
+            if (typeof updateProgress === 'function') updateProgress();
+        } else {
+            alert('Ошибка сервера (код ' + response.status + ')');
+        }
+    } catch (e) {
+        alert('Нет связи с n8n. Проверьте интернет.');
+    } finally {
+        btn.disabled = false;
+        btn.innerText = "Отправить ответы";
+    }
+}
+
 </script>
 </body>
 </html>
+
+
+
+
+
 
 
 
