@@ -576,8 +576,8 @@ async function apiCall(action, difficulty = 'medium', specificId = null) {
                 apiSurveyBtn.style.backgroundColor = '#34c759';
                 apiSurveyBtn.onclick = () => showScreen('screen-survey');
                 document.getElementById('result-wrapper').appendChild(apiSurveyBtn);
+                apiSurveyBtn.style.display = 'block';
             }
-            apiSurveyBtn.style.display = 'block';
         }
     }
   quizWrapper.style.display = 'none'; 
@@ -859,6 +859,7 @@ async function sendSurveyData() {
 </script>
 </body>
 </html>
+
 
 
 
