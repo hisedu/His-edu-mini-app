@@ -581,7 +581,6 @@ async function apiCall(action, difficulty = 'medium', specificId = null) {
       quizWrapper.style.display = 'none'; 
         }
     }
-  }
   } catch (error) {
   alert('Ошибка API: ' + error.message);
   display.innerText = "Ошибка при вызове API: " + error.message;
@@ -859,6 +858,7 @@ async function sendSurveyData() {
 </script>
 </body>
 </html>
+
 
 
 
