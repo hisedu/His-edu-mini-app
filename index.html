@@ -775,18 +775,21 @@ function updateProgress() {
     const progress = document.getElementById('survey-progress');
     if (progress) progress.style.width = (filled / fields.length * 100) + '%';
 }
-
 async function sendSurveyData() {
+    const tg = window.Telegram.WebApp; // Берем объект напрямую
+    const user = tg.initDataUnsafe?.user; // Данные пользователя
+    
     const form = document.getElementById('survey-form');
     const formData = new FormData(form);
     const btn = document.getElementById('submit-survey-btn');
 
-       // Собираем данные ПЛЮС добавляем auth
+    // Формируем параметры. Если данных нет, останутся пустые строки, 
+    // но auth (initData) ОБЯЗАТЕЛЬНО передаем для узла Code в n8n
     const params = new URLSearchParams({
         "action": "survey",
-        "auth": tg.initData, // ВАЖНО: передаем сырые данные для проверки в n8n
-        "userId": tg.initDataUnsafe?.user?.id || 'unknown',
-        "username": tg.initDataUnsafe?.user?.username || 'anonymous',
+        "auth": tg.initData, // Это то, что проверяет ваш узел Code (строка 8 на скриншоте)
+        "userId": user?.id || "", 
+        "username": user?.username || "",
         "feature": formData.get('best_feature'),
         "freq": formData.get('usage_freq'),
         "limTest": formData.get('limit_tests'),
@@ -799,17 +802,19 @@ async function sendSurveyData() {
     btn.innerText = "Отправка...";
 
     try {
-        // Отправляем GET запрос (данные идут в конце ссылки после ?)
-        const response = await fetch(`https://hisedu.app.n8n.cloud/webhook-test/6b2e1e97-a736-4593-9263-817bf345391f`);
+        // Замените URL на ваш рабочий Webhook из n8n
+        const response = await fetch(`https://n8n.cloud{params.toString()}`);
 
         if (response.ok) {
-            alert('Спасибо за ответы!');
+            alert('Спасибо! Ваши ответы приняты.');
             showScreen('screen-main');
             form.reset();
             updateProgress();
+        } else {
+            alert('Ошибка сервера. Попробуйте позже.');
         }
     } catch (e) {
-        alert('Ошибка связи с сервером');
+        alert('Нет связи с сервером.');
     } finally {
         btn.disabled = false;
         btn.innerText = "Отправить ответы";
@@ -819,6 +824,7 @@ async function sendSurveyData() {
 </script>
 </body>
 </html>
+
 
 
 
