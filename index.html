@@ -358,6 +358,9 @@ let currentQuestionIndex = 0;
 let quizDataArray = []; 
 
 function showScreen(screenId) {
+  // Скрываем кнопки опроса при каждом переключении
+    if (document.getElementById('survey-invite-btn')) document.getElementById('survey-invite-btn').style.display = 'none';
+    if (document.getElementById('api-survey-btn')) document.getElementById('api-survey-btn').style.display = 'none';
     document.querySelectorAll('.screen-container').forEach(el => el.style.display = 'none');
     document.getElementById('result-wrapper').style.display = 'none';
     document.getElementById('quiz-wrapper').style.display = 'none'; 
@@ -559,7 +562,24 @@ async function apiCall(action, difficulty = 'medium', specificId = null) {
   } else {
   display.style.display = 'block';
   display.innerText = dataString;
-  document.querySelector('.copy-btn').style.display = 'block'; 
+  document.querySelector('.copy-btn').style.display = 'block';
+    // ПРОВЕРКА: Показываем кнопку только если опрос еще не пройден
+        if (!localStorage.getItem('survey_completed')) {
+            let apiSurveyBtn = document.getElementById('api-survey-btn');
+            if (!apiSurveyBtn) {
+                apiSurveyBtn = document.createElement('button');
+                apiSurveyBtn.id = 'api-survey-btn';
+                apiSurveyBtn.innerText = '📝 Помочь проекту (Опрос)';
+                apiSurveyBtn.classList.add('final-quiz-btn');
+                apiSurveyBtn.style.width = '100%';
+                apiSurveyBtn.style.marginTop = '10px';
+                apiSurveyBtn.style.backgroundColor = '#34c759';
+                apiSurveyBtn.onclick = () => showScreen('screen-survey');
+                document.getElementById('result-wrapper').appendChild(apiSurveyBtn);
+            }
+            apiSurveyBtn.style.display = 'block';
+        }
+    }
   quizWrapper.style.display = 'none'; 
   }
   } catch (error) {
@@ -734,6 +754,21 @@ if (!newTestBtn) {
  document.getElementById('quiz-wrapper').appendChild(newTestBtn); 
 }
 newTestBtn.style.display = 'block';
+   // ПРОВЕРКА: Если метки 'survey_completed' НЕТ, показываем кнопку
+    if (!localStorage.getItem('survey_completed')) {
+        let surveyInviteBtn = document.getElementById('survey-invite-btn');
+        if (!surveyInviteBtn) {
+            surveyInviteBtn = document.createElement('button');
+            surveyInviteBtn.id = 'survey-invite-btn';
+            surveyInviteBtn.innerText = '📝 Помочь проекту (Опрос)';
+            surveyInviteBtn.classList.add('final-quiz-btn');
+            surveyInviteBtn.style.backgroundColor = '#34c759';
+            surveyInviteBtn.style.marginTop = '10px';
+            surveyInviteBtn.onclick = () => showScreen('screen-survey');
+            document.getElementById('quiz-wrapper').appendChild(surveyInviteBtn);
+        }
+        surveyInviteBtn.style.display = 'block';
+    }
 // --- Добавленный код для кнопки "Вернуться в меню" ---
 let mainMenuBtn = document.getElementById('main-menu-btn');
 if (!mainMenuBtn) {
@@ -806,6 +841,7 @@ async function sendSurveyData() {
 
         if (response.ok) {
             alert('Спасибо! Ваши ответы приняты.');
+            localStorage.setItem('survey_completed', 'true');
             showScreen('screen-main');
             form.reset();
             if (typeof updateProgress === 'function') updateProgress();
@@ -823,6 +859,7 @@ async function sendSurveyData() {
 </script>
 </body>
 </html>
+
 
 
 
