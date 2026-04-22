@@ -1,1 +1,883 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>His Edu App</title>
+<script src="https://max.ru"></script>
+<style>
+:root {
+  --bg-color: var(--tg-theme-bg-color, #ffffff);
+  --text-color: var(--tg-theme-text-color, #000000);
+  --hint-color: var(--tg-theme-hint-color, #999999);
+  --button-color: var(--tg-theme-button-color, #2481cc);
+  --button-text: var(--tg-theme-button-text-color, #ffffff);
+  --sec-bg: var(--tg-theme-secondary-bg-color, #f4f4f5);
+
+  /* Ваши новые переменные цветов, использующие запасные (fallback) цвета */
+  --summary-short-color: #007bff;
+  --summary-medium-color: #17a2b8;
+  --summary-detailed-color: #28a745;
+  --dates-color: #ffc107;
+  --terms-color: #6f42c1;
+  --qa-color: #fd7e14;
+  --reference-color: #5a67d8; /* Фиолетово-синий для главной кнопки */
+  --reference-content-color: #007bff; /* Синий для содержания */
+  --reference-dynasty-color: #6f42c1; /* Фиолетовый для династии */
+  --reference-maps-color: #ffc107; /* Желтый для карт */
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  margin: 0;
+  padding: 16px;
+  line-height: 1.5;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+.screen-container { display: none; flex-direction: column; gap: 20px; }
+.header { margin-bottom: 10px; }
+.header h1 { font-size: 20px; margin: 0; font-weight: 700; }
+.header p { color: var(--hint-color); font-size: 14px; margin-top: 4px; }
+button {
+  border: none; border-radius: 12px; padding: 12px 10px; font-size: 14px;
+  font-weight: 600; cursor: pointer; background-color: var(--button-color);
+  color: var(--button-text); transition: all 0.2s ease;
+}
+button:active { transform: scale(0.98); }
+button:disabled { background-color: var(--hint-color); opacity: 0.6; cursor: not-allowed; }
+.grid-buttons { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+#result-wrapper { display: none; background: var(--sec-bg); border-radius: 16px; padding: 16px; 
+margin-top: 20px; animation: fadeIn 0.3s ease; }
+#result-text { font-size: 15px; white-space: pre-wrap; margin-bottom: 15px; }
+.copy-btn { width: 100%; background-color: #34c759; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: 
+translateY(0); } }
+
+/* Стилизация кнопок главного меню разными цветами (с эмодзи) */
+.btn-list { background-color: #007bff; color: white; }
+.btn-test { background-color: #ffc107; color: black; }
+.final-quiz-btn { background-color: #28a745; color: white; margin-top: 10px; }
+.btn-section { background-color: #6f42c1; color: white; }
+/* Новый класс для кнопки МЦКО */
+.btn-mcko { background-color: #e67e22; color: white; }
+.btn-reference { background-color: var(--reference-color); color: white; }
+/* Класс для кнопки "Содержание" */
+.btn-content { background-color: var(--reference-content-color); color: white; }
+/* Класс для кнопки "Династия Рюриковичей" */
+.btn-dynasty { background-color: var(--reference-dynasty-color); color: white; }
+/* Класс для кнопки "Исторические карты" */
+.btn-maps { background-color: var(--reference-maps-color); color: black; }
+/* Стили для теста */
+.quiz-btn {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 8px;
+  border: none;
+  border-radius: 8px;
+  background-color: var(--sec-bg);
+  color: var(--text-color);
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
+}
+.quiz-btn:hover { opacity: 0.9; }
+.quiz-btn.correct { background-color: #4CAF50 !important; color: white !important; }
+.quiz-btn.incorrect { background-color: #f44336 !important; color: white !important; }
+#explanation-area {
+  margin-top: 15px;
+  padding: 12px;
+  background-color: var(--hint-color);
+  border-radius: 8px;
+  display: none;
+  color: white;
+}
+#quiz-final-results {
+  margin-top: 15px;
+  padding: 12px;
+  background-color: var(--sec-bg);
+  border-radius: 8px;
+  display: none;
+  font-weight: bold;
+}
+
+/* Стилизация кнопок действий с параграфом разными цветами с использованием переменных */
+.btn-summary.short { background-color: var(--summary-short-color); color: white; }
+.btn-summary.medium { background-color: var(--summary-medium-color); color: white; }
+.btn-summary.detailed { background-color: var(--summary-detailed-color); color: white; }
+.btn-dates { background-color: var(--dates-color); color: black; }
+.btn-terms { background-color: var(--terms-color); color: white; }
+.btn-qa { background-color: var(--qa-color); color: white; }
+
+/* Адаптивные стили для экранов шириной до 600px */
+@media screen and (max-width: 600px) {
+    /* На маленьких экранах сетка с 3 колонками превратится в 1 колонку */
+    .grid-buttons {
+        grid-template-columns: 1fr;
+    }
+    /* Уменьшаем padding и размер шрифта для лучшего отображения на мобильных устройствах */
+    body {
+        padding: 10px;
+        font-size: 14px;
+    }
+    /* Уменьшаем заголовки в мобильном представлении */
+    .header h1 {
+        font-size: 18px;
+    }
+}
+</style>
+</head>
+<body>
+
+<!-- ЭКРАН 1: Главное меню -->
+<div id="screen-main" class="screen-container">
+<div class="header"><h1>История для всех</h1><p>Выберите параграф</p></div>
+<button onclick="showScreen('screen-paragraph-list')" class="btn-list">📖 Выбери параграф (43 шт)</button>
+<button onclick="showScreen('screen-easy-quiz-select')" class="btn-test">🧠 Лёгкий тест</button>
+<button onclick="showScreen('screen-hard-quiz-select')" class="btn-test">💡 Тяжёлый тест</button>
+<button onclick="showScreen('screen-section-quiz')" class="btn-section">📚 Контрольная работа по разделам</button>
+<!-- Изменен вызов для итоговой контрольной работы с эмодзи -->
+<button onclick="selectQuizSection('section_quiz', 'medium', '1-43', 'Итоговая контрольная работа', 'screen-main')" class="final-quiz-btn">🏆 Итоговая контрольная работа</button>
+<!-- НОВАЯ КНОПКА МЦКО -->
+<button onclick="alert('Функционал ВПР/МЦКО пока в разработке!');" class="btn-mcko">🏫 Подготовка к тестированию ВПР/МЦКО</button>
+<button onclick="showScreen('screen-reference-materials')" class="btn-reference">📖 Справочные материалы</button> 
+<button onclick="showScreen('screen-survey')" class="btn-mcko" style="margin-top: 10px; background-color: #6f42c1;">📝 !!! Пройдите опрос !!!</button>
+</div>
+  
+<!-- ЭКРАН 2: Список параграфов (43 кнопки) -->
+<div id="screen-paragraph-list" class="screen-container">
+<button onclick="showScreen('screen-main')">← Назад</button>
+<div class="header"><h3>Выберите номер параграфа</h3></div>
+<div id="paragraph-buttons-grid" class="grid-buttons"></div>
+</div>
+
+<!-- ЭКРАН 3: Действия с параграфом (пересказы, даты) -->
+<div id="screen-paragraph-actions" class="screen-container">
+<button onclick="showScreen('screen-paragraph-list')">← Назад к списку параграфов</button>
+<h3 id="current-paragraph-title">Действия</h3>
+<button onclick="apiCall('short_summary')" class="btn-summary short">📝 Краткий пересказ</button>
+<button onclick="apiCall('medium_summary')" class="btn-summary medium">📘 Средний пересказ</button>
+<button onclick="apiCall('detailed_summary')" class="btn-summary detailed">📖 Подробный пересказ</button>
+<button onclick="apiCall('dates')" class="btn-dates">📅 Основные даты</button>
+<button onclick="apiCall('terms')" class="btn-terms">📌 Основные термины и определения</button>
+<button onclick="apiCall('qa')" class="btn-qa">❓ Вопросы и ответы</button>
+</div>
+
+<!-- ЭКРАН 4: Выбор раздела для контрольной работы -->
+<div id="screen-section-quiz" class="screen-container">
+<button onclick="showScreen('screen-main')">← Назад в меню</button>
+<div class="header"><h3>Выберите раздел (параграфы)</h3></div>
+<!-- Измененные вызовы с эмодзи -->
+<button onclick="selectQuizSection('section_quiz', 'medium', '1-12', 'Контрольная работа по Разделу I', 'screen-section-quiz')">📜 Раздел I (Параграфы 1-12)</button>
+<button onclick="selectQuizSection('section_quiz', 'medium', '13-20', 'Контрольная работа по Разделу II', 'screen-section-quiz')">📜 Раздел II (Параграфы 13-20)</button>
+<button onclick="selectQuizSection('section_quiz', 'medium', '21-33', 'Контрольная работа по Разделу III', 'screen-section-quiz')">📜 Раздел III (Параграфы 21-33)</button>
+<button onclick="selectQuizSection('section_quiz', 'medium', '34-43', 'Контрольная работа по Разделу IV', 'screen-section-quiz')">📜 Раздел IV (34-43)</button>
+</div>
+
+<!-- ЭКРАН 6: Выбор параграфа для Лёгкого теста -->
+<div id="screen-easy-quiz-select" class="screen-container">
+<button onclick="showScreen('screen-main')">← Назад в меню</button>
+<div id="easy-buttons-grid" class="grid-buttons"></div>
+</div>
+
+<!-- ЭКРАН 7: Выбор параграфа для Тяжёлого теста -->
+<div id="screen-hard-quiz-select" class="screen-container">
+<button onclick="showScreen('screen-main')">← Назад в меню</button>
+<div id="hard-buttons-grid" class="grid-buttons"></div>
+</div>
+
+<!-- НОВЫЙ ЭКРАН 8: Подтверждение начала теста -->
+<div id="screen-quiz-start-confirmation" class="screen-container">
+ <button id="back-from-quiz-confirm" onclick="showScreen('screen-main')">← Назад</button>
+ <h3 id="quiz-confirm-title">Подготовка к тесту</h3>
+ <p id="quiz-confirm-text">Начать тест по выбранному параграфу?</p>
+ <button onclick="startConfirmedTest()" class="final-quiz-btn" style="background-color: #007bff;">▶️ Начать тест</button>
+</div>
+
+<!-- НОВЫЙ ЭКРАН 9: Справочные материалы (меню) -->
+<div id="screen-reference-materials" class="screen-container">
+<button onclick="showScreen('screen-main')">← Назад в меню</button>
+<div class="header"><h3>Справочные материалы</h3></div>
+<button onclick="showScreen('screen-textbook-content')" class="btn-content">📜 Содержание учебника по Истории России за 6 класс (автор В. Р. Мединский, А. В. Торкунов)</button>
+<button onclick="showScreen('screen-rurikovich-dynasty')" class="btn-dynasty">👑 Династия Рюриковичей в IX — начале XVI в.</button>
+<button onclick="showScreen('screen-historical-maps')" class="btn-maps">🗺️ Исторические карты</button>
+</div>
+
+<!-- НОВЫЙ ЭКРАН 10: Содержание учебника -->
+<div id="screen-textbook-content" class="screen-container">
+<button onclick="showScreen('screen-reference-materials')">← Назад к материалам</button>
+<div class="header"><h3>Содержание учебника по Истории России за 6 класс (автор В. Р. Мединский, А. В. Торкунов)</h3></div>
+<div id="textbook-content-display"></div>
+</div>
+
+<!-- НОВЫЙ ЭКРАН 11: Династия Рюриковичей -->
+<div id="screen-rurikovich-dynasty" class="screen-container">
+    <button onclick="showScreen('screen-reference-materials')">← Назад к материалам</button>
+    <div class="header">
+        <h3>Династия Рюриковичей в IX — начале XVI в.</h3>
+        <p style="font-size: 12px; color: var(--hint-color); margin-top: 4px;">👆 Нажмите на схему для увеличения (зума) и она откроется в хорошем качестве.</p>
+    </div>
+    
+    <div id="rurikovich-dynasty-display" style="text-align: center; padding-bottom: 20px;">
+        <!-- 1. Ссылка (href) — чтобы картинка открылась во весь экран при нажатии -->
+        <a href="https://cdn.jsdelivr.net/gh/hisedu/images@main/Rurik.JPG" target="_blank" style="display: block; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+            <!-- 2. Само изображение (src) — чтобы оно отображалось на странице -->
+            <img src="https://cdn.jsdelivr.net/gh/hisedu/images@main/Rurik.JPG" 
+                 alt="Схема Династии Рюриковичей" 
+                 style="width: 100%; display: block; cursor: zoom-in;">
+        </a>
+    </div>
+</div>
+
+<!-- ЭКРАН 12: Исторические карты -->
+<div id="screen-historical-maps" class="screen-container" style="display: none;">
+    <button onclick="showScreen('screen-reference-materials')" style="align-self: flex-start; margin-bottom: 15px; padding: 10px 20px; background-color: #007AFF; color: #ffffff; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; font-family: inherit;">
+        ← Назад к материалам</button>
+        <div class="header" style="text-align: center; margin-bottom: 20px;">
+        <h3 style="margin: 0;">Исторические карты</h3>
+        <p style="font-size: 13px; color: #666; margin-top: 8px;"> ☝️ Нажмите на схему для увеличения (зума) и она откроется в хорошем качестве.</p>
+    </div>
+    <!-- Здесь JavaScript отрисует все 4 карты -->
+    <div id="historical-maps-display" style="width: 100%; display: flex; flex-direction: column; gap: 30px; padding-bottom: 40px;">
+    </div>
+</div>
+  
+  <!-- Контейнер результата (единый для всех экранов) -->
+<div id="result-wrapper">
+<button class="copy-btn" onclick="copyToClipboard()">Копировать результат</button>
+<div id="result-text"></div> 
+<!-- НОВАЯ СТРУКТУРА КВИЗА -->
+<div id="quiz-wrapper" style="display: none; border-radius: 12px; padding: 15px; margin-top: 15px; 
+background-color: var(--tg-theme-secondary-bg-color);">
+<!-- БЛОК СЧЕТА И КНОПКИ СБРОСА -->
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; 
+font-weight: bold; color: var(--tg-theme-text-color); padding: 0 5px;">
+<div>
+Счет: <span id="score-correct" style="color: #4CAF50;">0</span> правильно, 
+<span id="score-incorrect" style="color: #F44336;">0</span> неправильно
+</div>
+<button id="reset-score-btn" onclick="resetQuizAndStartOver()" style="background: none; border: 
+1px solid var(--tg-theme-button-color); color: var(--tg-theme-button-color); padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 0.8em;">Сброс</button>
+</div>
+<div id="quiz-question" style="font-weight: bold; margin-bottom: 15px; font-size: 1.1em; color: var(--tg-theme-text-color);"></div>
+<div id="quiz-options" style="display: flex; flex-direction: column; gap: 10px;"></div>
+<div id="explanation-area"><span id="explanation-text"></span></div>
+<div id="quiz-final-results"></div>
+<!-- КНОПКА "Следующий вопрос" -->
+<button id="next-question-btn" onclick="loadNextQuestion()" style="display: none; margin-top: 15px; 
+width: 100%; padding: 12px; background-color: var(--tg-theme-button-color); color: var(--tg-theme-button-text-color); border: none; border-radius: 8px; cursor: pointer;">
+Следующий вопрос
+</button>
+</div>
+</div>
+<!-- ЭКРАН ОПРОСА (Вставлять ПЕРЕД тегом <script>) -->
+<div id="screen-survey" class="screen-container" style="display: none; padding: 20px;">
+    <button onclick="showScreen('screen-main')" style="margin-bottom: 15px;">← Назад</button>
+    
+    <div style="width: 100%; background: var(--bg-color); height: 8px; border-radius: 10px; margin-bottom: 20px; overflow: hidden; border: 1px solid var(--hint-color);">
+        <div id="survey-progress" style="width: 0%; height: 100%; background: #34c759; transition: width 0.3s ease;"></div>
+    </div>
+
+    <form id="survey-form" onchange="updateProgress()" style="display: flex; flex-direction: column; gap: 15px; background: var(--sec-bg); padding: 16px; border-radius: 16px;">
+        <label>1. Что самое полезное в приложении?
+            <select name="best_feature" required style="width:100%; padding:8px; margin-top:5px; border-radius:8px;">
+                <option value="" disabled selected>Выберите...</option>
+                <option value="Пересказы">Пересказы</option>
+                <option value="Тесты">Тесты</option>
+                <option value="Исторические карты">Исторические карты</option>
+                <option value="Даты и определения">Даты и определения</option>
+                <option value="Контрольные работы">Контрольные работы</option>
+            </select>
+        </label>
+
+        <label>2. Как часто заходите в приложение?
+            <select name="usage_freq" required style="width:100%; padding:8px; margin-top:5px; border-radius:8px;">
+                <option value="" disabled selected>Выберите...</option>
+                <option value="Ежедневно">Ежедневно</option>
+                <option value="Перед уроком">Перед уроком</option>
+                <option value="Редко">Редко</option>
+                <option value="Первый раз">Первый раз</option>
+            </select>
+        </label>
+
+        <label>3. Останетесь при ограничении бесплатного лимита на тесты (не более 2 раз в день)?
+            <select name="limit_tests" required style="width:100%; padding:8px; margin-top:5px; border-radius:8px;">
+                <option value="Да">Да</option>
+                <option value="Нет">Нет</option>
+            </select>
+        </label>
+
+        <label>4. Останетесь при ограничении бесплатного лимита на ВСЁ (не более 5 раз в день)?
+            <select name="limit_all" required style="width:100%; padding:8px; margin-top:5px; border-radius:8px;">
+                <option value="Да">Да</option>
+                <option value="Нет">Нет</option>
+            </select>
+        </label>
+
+        <label>5. Как удобнее платить?
+            <select name="payment_model" required style="width:100%; padding:8px; margin-top:5px; border-radius:8px;">
+                <option value="Разово">Разово (19₽)</option>
+                <option value="Подписка">Подписка (149₽/мес)</option>
+                <option value="Звезды">Звёзды ⭐️</option>
+                <option value="Реклама">Реклама</option>
+            </select>
+        </label>
+
+        <textarea name="feedback" rows="3" oninput="updateProgress()" placeholder="Чего не хватает? За что бы вы заплатили?" style="width:100%; padding:8px; border-radius:8px;"></textarea>
+
+        <div style="font-size: 11px; color: var(--hint-color); line-height: 1.2;">
+            Развитие приложения без вложений невозможно (сервера, нейросети). Помогите нам найти путь развития. 🙏
+        </div>
+
+        <button type="button" id="submit-survey-btn" onclick="sendSurveyData()" class="final-quiz-btn" style="background: #34c759; color: white; padding: 12px; border-radius: 12px; border: none; font-weight: bold;">Отправить ответы</button>
+    </form>
+</div>
+  
+<script>
+// --- ГЛОБАЛЬНЫЕ ФУНКЦИИ И ПЕРЕМЕННЫЕ ---
+const sectionQuestionsCount = {
+    "1-12": 17,  // Раздел I
+    "13-20": 13, // Раздел II
+    "21-33": 18, // Раздел III
+    "34-43": 15, // Раздел IV
+    "1-43": 48   // Итоговая работа
+};
+let tg = null; 
+let currentPId = null; 
+// Переменные для сохранения контекста теста
+let currentTestAction = null; 
+let currentTestDifficulty = null;
+let currentTestSpecificId = null;
+let correctAnswersCount = 0;
+let incorrectAnswersCount = 0;
+let currentQuestionIndex = 0;
+let quizDataArray = []; 
+
+function showScreen(screenId) {
+  // Скрываем кнопки опроса при каждом переключении
+    if (document.getElementById('survey-invite-btn')) document.getElementById('survey-invite-btn').style.display = 'none';
+    if (document.getElementById('api-survey-btn')) document.getElementById('api-survey-btn').style.display = 'none';
+    document.querySelectorAll('.screen-container').forEach(el => el.style.display = 'none');
+    document.getElementById('result-wrapper').style.display = 'none';
+    document.getElementById('quiz-wrapper').style.display = 'none'; 
+    document.getElementById('explanation-area').style.display = 'none';
+    document.getElementById('result-text').style.display = 'block'; 
+    document.querySelector('.copy-btn').style.display = 'block'; 
+    if (tg) tg.HapticFeedback.impactOccurred('light');
+    document.getElementById(screenId).style.display = 'flex';
+
+    // 1. Содержание учебника
+    if (screenId === 'screen-textbook-content') {
+        const contentEl = document.getElementById('textbook-content-display');
+        contentEl.innerText = "§ 1. Великое переселение народов. Восточная Европа и Северная Азия в 1-м тыс. н. э. (p. 1)\n" +
+                              "§ 2–3. Восточные славяне и их соседи (p. 1)\n" +
+                              "§ 4. Начало династии Рюриковичей (p. 1)\n" +
+                              "§ 5–6. Русь при Игоре, Ольге, Святославе (p. 1)\n" +
+                              "§ 7–8. Русь при Владимире Святом (p. 1)\n" +
+                              "§ 9. Расцвет Руси при Ярославе Мудром (p. 1)\n" +
+                              "§ 10–11. Наследники Ярослава Мудрого (p. 1)\n" +
+                              "§ 12. Русь при Владимире Мономахе (p. 1)\n" +
+                              "§ 13. Политическая раздробленность Руси (p. 1)\n" +
+                              "§ 14–15. Владимиро-Суздальская земля (p. 1)\n" +
+                              "§ 16–17. Новгородская земля (p. 1)\n" +
+                              "§ 18. Юго-Западная Русь (p. 1)\n" +
+                              "§ 19–20. Культура и быт в IX — начале XIII в. (p. 1)\n" +
+                              "§ 21. Чингисхан и его империя (p. 1)\n" +
+                              "§ 22–23. Натиск на русские земли с востока (p. 1)\n" +
+                              "§ 24–25. Отражение агрессии с запада (p. 1)\n" +
+                              "§ 26–27. Русские земли и Золотая Орда (p. 1)\n" +
+                              "§ 28–29. Русь и Великое княжество Литовское (p. 2)\n" +
+                              "§ 30. Северо-Восточная Русь в конце XIII — начале XIV в. (p. 2)\n" +
+                              "§ 31. Возвышение Москвы (p. 2)\n" +
+                              "§ 32–33. Победа на Куликовом поле (p. 2)\n" +
+                              "§ 34–35. Московское княжество в конце XIV — первой половине XV в. (p. 2)\n" +
+                              "§ 36–37. Иван III — государь всея Руси (p. 2)\n" +
+                              "§ 38–39. Российское государство и общество во второй половине XV в. (p. 2)\n" +
+                              "§ 40–41. Правление Василия III (p. 2)\n" +
+                              "§ 42–43. Культура во второй половине XIII — первой трети XVI в. (p. 2)";
+    } 
+    // 2. Династия Рюриковичей
+    else if (screenId === 'screen-rurikovich-dynasty') {
+        // Здесь ваша логика для династии
+    } 
+    // 3. ИСТОРИЧЕСКИЕ КАРТЫ (ОБНОВЛЕНО)
+    else if (screenId === 'screen-historical-maps') {
+        const mapsDisplayEl = document.getElementById('historical-maps-display');
+        mapsDisplayEl.innerHTML = ''; // Очищаем контейнер
+
+        const mapsData = [
+            { title: "Русь в IX–X вв.", file: "map1.jpg" },
+            { title: "Русь в конце X — XI в.", file: "map2.jpg" },
+            { title: "Русь в период раздробленности. 30-е гг. XII в. - первая четверть XIII в.", file: "map3.jpg" },
+            { title: "Нашествие на Русь с востока и запада", file: "map4.jpg" }
+        ];
+
+        mapsData.forEach(item => {
+            const mapWrapper = document.createElement('div');
+            mapWrapper.style.marginBottom = '30px';
+
+            // Название карты
+            const title = document.createElement('h4');
+            title.innerText = item.title;
+            title.style.margin = '0 0 10px 0';
+            title.style.fontSize = '15px';
+            title.style.color = 'var(--tg-theme-text-color, #000)';
+
+            // Ссылка для зума
+            const link = document.createElement('a');
+            link.href = `https://cdn.jsdelivr.net/gh/hisedu/images@main/${item.file}`;
+            link.target = '_blank';
+
+            // Картинка
+            const img = document.createElement('img');
+            img.src = `https://cdn.jsdelivr.net/gh/hisedu/images@main/${item.file}`;
+            img.style.width = '100%';
+            img.style.borderRadius = '10px';
+            img.style.boxShadow = '0 4px 10px rgba(0,0,0,0.1)';
+            img.style.display = 'block';
+
+            link.appendChild(img);
+            mapWrapper.appendChild(title);
+            mapWrapper.appendChild(link);
+            mapsDisplayEl.appendChild(mapWrapper);
+        });
+    }
+}
+
+// ЭТА ФУНКЦИЯ ТЕПЕРЬ ОТВЕЧАЕТ ЗА ПЕРЕХОД НА ЭКРАН ПОДТВЕРЖДЕНИЯ ТЕСТА
+function selectQuizParagraph(pId, difficulty, action, returnScreenId) {
+ currentTestAction = action;
+ currentTestDifficulty = difficulty;
+ currentTestSpecificId = pId.toString();
+ currentPId = pId; // Также обновляем currentPId для универсальности
+ 
+ document.getElementById('quiz-confirm-title').innerText = `${difficulty === 'easy' ? 'Лёгкий' : 
+'Тяжёлый'} тест: Параграф ${pId}`;
+document.getElementById('quiz-confirm-text').innerText = `Начать тест по выбранному параграфу?\nКоличество вопросов: 10`;
+
+  // Определяем, куда возвращаться по кнопке "назад" на экране подтверждения
+ document.getElementById('back-from-quiz-confirm').onclick = () => showScreen(returnScreenId);
+ showScreen('screen-quiz-start-confirmation');
+}
+
+// НОВАЯ ФУНКЦИЯ: Запуск теста после подтверждения
+function startConfirmedTest() {
+ if (currentTestAction && currentTestSpecificId) {
+  apiCall(currentTestAction, currentTestDifficulty, currentTestSpecificId);
+ } else {
+  alert("Произошла ошибка при определении параметров теста.");
+  showScreen('screen-main');
+ }
+}
+
+// НОВАЯ ФУНКЦИЯ: для контрольных работ по разделам (использует тот же экран подтверждения)
+function selectQuizSection(action, difficulty, specificId, titleText, returnScreenId) {
+    currentTestAction = action;
+    currentTestDifficulty = difficulty;
+    currentTestSpecificId = specificId;
+    currentPId = specificId;
+  
+        // Получаем количество вопросов из нашего справочника по ключу specificId (например "1-12")
+    const count = sectionQuestionsCount[specificId] || "неизвестно";
+        document.getElementById('quiz-confirm-title').innerText = `${titleText}`;
+    
+    // ИЗМЕНЕННАЯ СТРОКА:
+    document.getElementById('quiz-confirm-text').innerText = `Начать ${titleText} (${specificId})?\nКоличество вопросов: ${count}`;
+        document.getElementById('back-from-quiz-confirm').onclick = () => showScreen(returnScreenId);
+    showScreen('screen-quiz-start-confirmation');
+}
+
+
+// Функция handleApiCall была удалена, так как заменена функцией selectQuizSection
+// function handleApiCall(...) { ... }
+
+function generateParagraphButtons() {
+const grid = document.getElementById('paragraph-buttons-grid');
+for (let i = 1; i <= 43; i++) {
+const button = document.createElement('button');
+button.textContent = i;
+button.onclick = () => selectParagraph(i);
+grid.appendChild(button);
+}
+}
+// ОБНОВЛЕННАЯ ФУНКЦИЯ: вызывает selectQuizParagraph вместо apiCall напрямую
+function generateQuizButtons(containerId, difficulty, returnScreenId) {
+const grid = document.getElementById(containerId);
+if (!grid) return;
+grid.innerHTML = '';
+for (let i = 1; i <= 43; i++) {
+const button = document.createElement('button');
+button.textContent = i;
+// Теперь onclick вызывает промежуточный экран с правильным параметром action
+const actionName = difficulty === 'hard' ? 'hard_test' : 'test'; // Определяем нужное действие
+button.onclick = () => selectQuizParagraph(i, difficulty, actionName, returnScreenId);
+grid.appendChild(button);
+}
+}
+function selectParagraph(pId) {
+currentPId = pId;
+document.getElementById('current-paragraph-title').innerText = `Параграф ${currentPId}`;
+showScreen('screen-paragraph-actions');
+}
+// !!! ГЛАВНАЯ ФУНКЦИЯ API CALL ОСТАЕТСЯ БЕЗ ИЗМЕНЕНИЙ В ЛОГИКЕ !!!
+async function apiCall(action, difficulty = 'medium', specificId = null) {
+ const display = document.getElementById('result-text');
+ const quizWrapper = document.getElementById('quiz-wrapper');
+ const resultWrapper = document.getElementById('result-wrapper');
+ const buttons = document.querySelectorAll('button');
+ 
+ buttons.forEach(b => b.disabled = true);
+ display.innerText = "Загрузка...";
+ resultWrapper.style.display = 'block';
+ quizWrapper.style.display = 'none'; 
+ document.querySelector('.copy-btn').style.display = 'none'; 
+ display.style.display = 'block';
+ if (action.includes('test') || action.includes('quiz')) {
+  currentTestAction = action;
+  currentTestDifficulty = difficulty;
+  currentTestSpecificId = specificId;
+ } else {
+  currentTestAction = null;
+  currentTestDifficulty = null;
+  currentTestSpecificId = null;
+ }
+ try {
+  const targetUrl = 'https://hisedu.app.n8n.cloud/webhook-test/953a3b88-4bce-42ea-8bd5-eeb6a3345cc1'; 
+  let finalPId = specificId || currentPId || 'N/A';
+ 
+  const url = 
+  `${targetUrl}?id=${finalPId}&action=${action}&diff=${difficulty}&auth=${encodeURIComponent(tg.initData)}`;
+  const response = await fetch(url);
+  const dataString = await response.text(); 
+    const quizDataArrayParsed = tryParseJson(dataString);
+    if (Array.isArray(quizDataArrayParsed) && quizDataArrayParsed.length >= 10) { 
+      display.style.display = 'none'; 
+      startQuiz(quizDataArrayParsed); 
+      document.querySelector('.copy-btn').style.display = 'none'; 
+  } else {
+      display.style.display = 'block';
+      display.innerText = dataString;
+      document.querySelector('.copy-btn').style.display = 'block';
+      
+      // Скрываем обертку квиза, так как пришел текст
+      if (quizWrapper) quizWrapper.style.display = 'none'; 
+
+      // ПРОВЕРКА: Показываем кнопку только если опрос еще не пройден
+      if (!localStorage.getItem('survey_completed')) {
+          let apiSurveyBtn = document.getElementById('api-survey-btn');
+          if (!apiSurveyBtn) {
+              apiSurveyBtn = document.createElement('button');
+              apiSurveyBtn.id = 'api-survey-btn';
+              apiSurveyBtn.innerText = '📝 Помочь проекту (Опрос)';
+              apiSurveyBtn.classList.add('final-quiz-btn');
+              apiSurveyBtn.style.width = '100%';
+              apiSurveyBtn.style.marginTop = '10px';
+              apiSurveyBtn.style.backgroundColor = '#34c759';
+              apiSurveyBtn.onclick = () => showScreen('screen-survey');
+              document.getElementById('result-wrapper').appendChild(apiSurveyBtn);
+          }
+          apiSurveyBtn.style.display = 'block';
+      }
+  } // Закрывает else
+} catch (error) { // ЗАКРЫВАЕТ try и НАЧИНАЕТ catch
+    alert('Ошибка API: ' + error.message);
+    display.innerText = "Ошибка при вызове API: " + error.message;
+    display.style.display = 'block';
+    if (quizWrapper) quizWrapper.style.display = 'none';
+    document.querySelector('.copy-btn').style.display = 'none';
+} finally {
+    buttons.forEach(b => b.disabled = false);
+}
+}
+function copyToClipboard() {
+const resultTextElement = document.getElementById('result-text');
+const textToCopy = resultTextElement.textContent || resultTextElement.innerText;
+if (textToCopy) {
+navigator.clipboard.writeText(textToCopy).then(() => {
+const copyBtn = document.querySelector('.copy-btn');
+copyBtn.textContent = 'Скопировано!';
+if (tg) tg.HapticFeedback.notificationOccurred('success');
+setTimeout(() => {
+copyBtn.textContent = 'Копировать результат';
+}, 2000);
+}).catch(err => {
+console.error('Ошибка копирования: ', err);
+alert('Не удалось скопировать текст.');
+});
+}
+}
+// --- ВСПОМОГАТЕЛЬНАЯ ФУНКЦИЯ ДЛЯ ПАРСИНГА JSON (ОБНОВЛЕНО) ---
+function tryParseJson(str) {
+try {
+const json = JSON.parse(str);
+if (typeof json === 'object' && json !== null) {
+if (json.quizQuestions && Array.isArray(json.quizQuestions)) {
+return json.quizQuestions;
+}
+return json;
+}
+} catch (e) {
+}
+return null;
+}
+// --- ОБНОВЛЕННЫЕ ФУНКЦИИ ДЛЯ ТЕСТА (РАБОТА С МАССИВОМ И СЧЕТОМ) ---
+function startQuiz(quizArray) { 
+quizDataArray = quizArray;
+currentQuestionIndex = 0;
+resetQuizScore(); 
+loadQuestion(currentQuestionIndex);
+// После начала теста скрываем экран подтверждения и показываем обертку теста
+document.getElementById('screen-quiz-start-confirmation').style.display = 'none';
+document.getElementById('quiz-wrapper').style.display = 'block';
+const newTestBtn = document.getElementById('new-test-btn');
+if (newTestBtn) { newTestBtn.style.display = 'none'; }
+// --- Добавленный код для кнопки "Вернуться в меню" ---
+let mainMenuBtn = document.getElementById('main-menu-btn');
+if (!mainMenuBtn) {
+mainMenuBtn = document.createElement('button');
+mainMenuBtn.id = 'main-menu-btn';
+mainMenuBtn.innerText = 'Вернуться в главное меню';
+mainMenuBtn.classList.add('final-quiz-btn'); // Используем существующий стиль
+mainMenuBtn.style.backgroundColor = '#6f42c1'; // Произвольный цвет из CSS
+mainMenuBtn.onclick = () => showScreen('screen-main');
+// Добавляем кнопку перед первым дочерним элементом, чтобы она была вверху
+document.getElementById('quiz-wrapper').insertBefore(mainMenuBtn, document.getElementById('quiz-wrapper').firstChild);
+}
+mainMenuBtn.style.display = 'block'; // Убеждаемся, что она видна
+// ----------------------------------------------------
+}
+/**
+* ОБНОВЛЕННАЯ ФУНКЦИЯ ЗАГРУЗКИ ВОПРОСА
+*/
+function loadQuestion(index) {
+ if (index >= quizDataArray.length) {
+  showFinalResults();
+  return;
+ }
+ const data = quizDataArray[index];
+ const optionsEl = document.getElementById('quiz-options');
+ const explanationArea = document.getElementById('explanation-area');
+ const finalResultsEl = document.getElementById('quiz-final-results');
+ const nextBtn = document.getElementById('next-question-btn');
+ document.getElementById('quiz-question').innerText = `Вопрос ${index + 1}: ${data.q}`;
+ optionsEl.innerHTML = '';
+ explanationArea.style.display = 'none';
+ finalResultsEl.style.display = 'none';
+ nextBtn.style.display = 'none'; 
+ const answersTitle = document.createElement('h4');
+ answersTitle.innerText = 'Варианты ответов';
+ answersTitle.style.marginBottom = '10px';
+ answersTitle.style.color = 'var(--text-color)';
+ optionsEl.appendChild(answersTitle);
+ data.a.forEach((optionText, optionIndex) => {
+  const btn = document.createElement('button');
+  btn.innerText = `${optionIndex + 1}. ${optionText}`;
+  btn.classList.add('quiz-btn');
+  
+  btn.onclick = () => {
+  const allBtns = optionsEl.querySelectorAll('button');
+  allBtns.forEach(b => b.disabled = true);
+  if (optionIndex === data.c) {
+  btn.classList.add('correct');
+  correctAnswersCount++;
+  } else {
+  btn.classList.add('incorrect');
+  allBtns[data.c].classList.add('correct');
+  incorrectAnswersCount++;
+  }
+  document.getElementById('score-correct').innerText = correctAnswersCount;
+  document.getElementById('score-incorrect').innerText = incorrectAnswersCount;
+  document.getElementById('explanation-text').innerText = data.e;
+  document.getElementById('explanation-area').style.display = 'block';
+  nextBtn.style.display = 'block';
+  explanationArea.scrollIntoView({ behavior: 'smooth' });
+  };
+  optionsEl.appendChild(btn);
+ });
+}
+function loadNextQuestion() {
+currentQuestionIndex++;
+loadQuestion(currentQuestionIndex);
+}
+function resetQuizScore() {
+correctAnswersCount = 0;
+incorrectAnswersCount = 0;
+document.getElementById('score-correct').innerText = 0;
+document.getElementById('score-incorrect').innerText = 0;
+}
+function resetQuizAndStartOver() {
+resetQuizScore();
+currentQuestionIndex = 0;
+if (quizDataArray.length > 0) {
+loadQuestion(currentQuestionIndex);
+} else {
+document.getElementById('quiz-wrapper').style.display = 'none';
+}
+const newTestBtn = document.getElementById('new-test-btn');
+if (newTestBtn) { newTestBtn.style.display = 'none'; }
+}
+function startNewTestFromEnd() {
+ if (currentTestAction && currentTestDifficulty) {
+  apiCall(currentTestAction, currentTestDifficulty, currentTestSpecificId);
+  document.getElementById('quiz-final-results').style.display = 'none';
+  const newTestBtn = document.getElementById('new-test-btn');
+  if (newTestBtn) {
+  newTestBtn.style.display = 'none';
+  }
+ } else {
+  alert("Не удалось определить параметры предыдущего теста. Пожалуйста, начните тест из меню.");
+  showScreen('screen-main');
+ }
+}
+function showFinalResults() {
+const questionEl = document.getElementById('quiz-question');
+const optionsEl = document.getElementById('quiz-options');
+const explanationArea = document.getElementById('explanation-area');
+const nextBtn = document.getElementById('next-question-btn');
+const finalResultsEl = document.getElementById('quiz-final-results');
+questionEl.innerText = `Тест завершен! Ваш итоговый счет: ${correctAnswersCount} из ${quizDataArray.length}.`;
+optionsEl.innerHTML = '';
+explanationArea.style.display = 'none';
+nextBtn.style.display = 'none';
+finalResultsEl.innerText = 'Можете начать новый тест или сбросить счет.';
+finalResultsEl.style.display = 'block';
+let newTestBtn = document.getElementById('new-test-btn');
+if (!newTestBtn) {
+ newTestBtn = document.createElement('button');
+ newTestBtn.id = 'new-test-btn';
+ newTestBtn.innerText = 'Новый тест';
+ newTestBtn.classList.add('final-quiz-btn'); 
+ newTestBtn.onclick = startNewTestFromEnd;
+ document.getElementById('quiz-wrapper').appendChild(newTestBtn); 
+}
+newTestBtn.style.display = 'block';
+   // ПРОВЕРКА: Если метки 'survey_completed' НЕТ, показываем кнопку
+    if (!localStorage.getItem('survey_completed')) {
+        let surveyInviteBtn = document.getElementById('survey-invite-btn');
+        if (!surveyInviteBtn) {
+            surveyInviteBtn = document.createElement('button');
+            surveyInviteBtn.id = 'survey-invite-btn';
+            surveyInviteBtn.innerText = '📝 Помочь проекту (Опрос)';
+            surveyInviteBtn.classList.add('final-quiz-btn');
+            surveyInviteBtn.style.backgroundColor = '#34c759';
+            surveyInviteBtn.style.marginTop = '10px';
+            surveyInviteBtn.onclick = () => showScreen('screen-survey');
+            document.getElementById('quiz-wrapper').appendChild(surveyInviteBtn);
+        }
+        surveyInviteBtn.style.display = 'block';
+    }
+// --- Добавленный код для кнопки "Вернуться в меню" ---
+let mainMenuBtn = document.getElementById('main-menu-btn');
+if (!mainMenuBtn) {
+mainMenuBtn = document.createElement('button');
+mainMenuBtn.id = 'main-menu-btn';
+mainMenuBtn.innerText = 'Вернуться в главное меню';
+mainMenuBtn.classList.add('final-quiz-btn'); // Переименованный класс для единообразия
+mainMenuBtn.style.backgroundColor = '#6f42c1'; // Произвольный цвет из CSS
+mainMenuBtn.onclick = () => showScreen('screen-main');
+// Добавляем кнопку в конец quiz-wrapper
+document.getElementById('quiz-wrapper').appendChild(mainMenuBtn);
+}
+mainMenuBtn.style.display = 'block';
+// ----------------------------------------------------  
+}
+// --- Инициализация при старте ---
+function initWebApp() {
+if (window.Telegram && window.Telegram.WebApp) {
+tg = window.Telegram.WebApp; 
+tg.expand();
+tg.ready();
+generateParagraphButtons();
+// Передаем ID экрана возврата для правильной работы кнопки "назад"
+generateQuizButtons('easy-buttons-grid', 'easy', 'screen-easy-quiz-select');
+generateQuizButtons('hard-buttons-grid', 'hard', 'screen-hard-quiz-select');
+showScreen('screen-main');
+} else {
+setTimeout(initWebApp, 100); 
+}
+}
+initWebApp();
+  // Логика опроса
+function updateProgress() {
+    const form = document.getElementById('survey-form');
+    if (!form) return;
+    const fields = form.querySelectorAll('select, textarea');
+    let filled = 0;
+    fields.forEach(f => { if (f.value && f.value !== "") filled++; });
+    const progress = document.getElementById('survey-progress');
+    if (progress) progress.style.width = (filled / fields.length * 100) + '%';
+}
+async function sendSurveyData() {
+    const tg = window.Telegram.WebApp;
+    const user = tg.initDataUnsafe?.user; // Получаем данные реального юзера
+    
+    const form = document.getElementById('survey-form');
+    const formData = new FormData(form);
+    const btn = document.getElementById('submit-survey-btn');
+
+    // Собираем параметры для GET запроса
+    const params = new URLSearchParams({
+        "action": "survey",
+        "auth": tg.initData, // Для узла Code
+        "userId": user?.id || "no_id", 
+        "username": user?.username || "no_name",
+        "feature": formData.get('best_feature'),
+        "freq": formData.get('usage_freq'),
+        "limTest": formData.get('limit_tests'),
+        "limAll": formData.get('limit_all'),
+        "pay": formData.get('payment_model'),
+        "text": formData.get('feedback')
+    });
+
+    btn.disabled = true;
+    btn.innerText = "Отправка...";
+
+    try {
+        // ОБЯЗАТЕЛЬНО проверьте, что здесь ваш актуальный TEST URL из n8n
+        const response = await fetch(`https://hisedu.app.n8n.cloud/webhook/6b2e1e97-a736-4593-9263-817bf345391f?${params.toString()}`);
+
+        if (response.ok) {
+            alert('Спасибо! Ваши ответы приняты.');
+            localStorage.setItem('survey_completed', 'true');
+            showScreen('screen-main');
+            form.reset();
+            if (typeof updateProgress === 'function') updateProgress();
+        } else {
+            alert('Ошибка сервера (код ' + response.status + ')');
+        }
+    } catch (e) {
+        alert('Нет связи с n8n. Проверьте интернет.');
+    } finally {
+        btn.disabled = false;
+        btn.innerText = "Отправить ответы";
+    }
+}
+
+</script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
