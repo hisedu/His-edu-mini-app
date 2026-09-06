@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
@@ -56,7 +56,6 @@ margin-top: 20px; animation: fadeIn 0.3s ease; }
 .copy-btn { width: 100%; background-color: #34c759; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: 
 translateY(0); } }
-
 /* Стилизация кнопок главного меню разными цветами (с эмодзи) */
 .btn-list { background-color: #007bff; color: white; }
 .btn-test { background-color: #ffc107; color: black; }
@@ -104,7 +103,6 @@ translateY(0); } }
   display: none;
   font-weight: bold;
 }
-
 /* Стилизация кнопок действий с параграфом разными цветами с использованием переменных */
 .btn-summary.short { background-color: var(--summary-short-color); color: white; }
 .btn-summary.medium { background-color: var(--summary-medium-color); color: white; }
@@ -133,19 +131,34 @@ translateY(0); } }
 </head>
 <body>
 
-<!-- ЭКРАН 1: Главное меню -->
+<!-- ЭКРАН 0: Выбор класса -->
+<div id="screen-class-select" class="screen-container">
+<div class="header"><h1>История для всех</h1><p>Выберите класс</p></div>
+<button onclick="selectClass(6)" class="btn-list" style="padding: 22px; font-size: 18px; border-radius: 16px;">🎓 6 КЛАСС</button>
+<button onclick="selectClass(7)" class="btn-section" style="padding: 22px; font-size: 18px; border-radius: 16px;">🎓 7 КЛАСС</button>
+<button onclick="showScreen('screen-survey')" class="btn-mcko" style="margin-top: 10px; background-color: #6f42c1;">📝 !!! Пройдите опрос !!!</button>
+</div>
+
+<!-- ЭКРАН 0.1: Выбор курса (для классов с несколькими курсами) -->
+<div id="screen-course-select" class="screen-container">
+<button onclick="backToClassSelect()" style="align-self: flex-start;">← Назад</button>
+<div class="header"><h1>История для всех</h1><p id="course-select-subtitle">Выберите курс</p></div>
+<div id="course-buttons" style="width: 100%;"></div>
+</div>
+
+<!-- ЭКРАН 1: Меню класса -->
 <div id="screen-main" class="screen-container">
-<div class="header"><h1>История для всех</h1><p>Выберите параграф</p></div>
-<button onclick="showScreen('screen-paragraph-list')" class="btn-list">📖 Выбери параграф (43 шт)</button>
+<button onclick="backToClassSelect()" style="align-self: flex-start;">← Сменить класс</button>
+<div class="header"><h1>История для всех</h1><p id="class-menu-subtitle">Выберите раздел</p></div>
+<button onclick="showScreen('screen-paragraph-list')" class="btn-list">📖 Выбери параграф (<span id="paragraph-count-label">43 шт</span>)</button>
 <button onclick="showScreen('screen-easy-quiz-select')" class="btn-test">🧠 Лёгкий тест</button>
 <button onclick="showScreen('screen-hard-quiz-select')" class="btn-test">💡 Тяжёлый тест</button>
-<button onclick="showScreen('screen-section-quiz')" class="btn-section">📚 Контрольная работа по разделам</button>
-<!-- Изменен вызов для итоговой контрольной работы с эмодзи -->
-<button onclick="selectQuizSection('section_quiz', 'medium', '1-43', 'Итоговая контрольная работа', 'screen-main')" class="final-quiz-btn">🏆 Итоговая контрольная работа</button>
+<button onclick="showScreen('screen-section-quiz')" class="btn-section" id="section-quiz-menu-btn">📚 Контрольная работа по разделам</button>
+<!-- Изменен вызов для итоговой контрольной работы с эмодзи (onclick задаётся динамически) -->
+<button class="final-quiz-btn" id="final-quiz-menu-btn">🏆 Итоговая контрольная работа</button>
 <!-- НОВАЯ КНОПКА МЦКО -->
 <button onclick="alert('Функционал ВПР/МЦКО пока в разработке!');" class="btn-mcko">🏫 Подготовка к тестированию ВПР/МЦКО</button>
 <button onclick="showScreen('screen-reference-materials')" class="btn-reference">📖 Справочные материалы</button> 
-<button onclick="showScreen('screen-survey')" class="btn-mcko" style="margin-top: 10px; background-color: #6f42c1;">📝 !!! Пройдите опрос !!!</button>
 </div>
   
 <!-- ЭКРАН 2: Список параграфов (43 кнопки) -->
@@ -154,7 +167,6 @@ translateY(0); } }
 <div class="header"><h3>Выберите номер параграфа</h3></div>
 <div id="paragraph-buttons-grid" class="grid-buttons"></div>
 </div>
-
 <!-- ЭКРАН 3: Действия с параграфом (пересказы, даты) -->
 <div id="screen-paragraph-actions" class="screen-container">
 <button onclick="showScreen('screen-paragraph-list')">← Назад к списку параграфов</button>
@@ -166,30 +178,22 @@ translateY(0); } }
 <button onclick="apiCall('terms')" class="btn-terms">📌 Основные термины и определения</button>
 <button onclick="apiCall('qa')" class="btn-qa">❓ Вопросы и ответы</button>
 </div>
-
 <!-- ЭКРАН 4: Выбор раздела для контрольной работы -->
 <div id="screen-section-quiz" class="screen-container">
 <button onclick="showScreen('screen-main')">← Назад в меню</button>
-<div class="header"><h3>Выберите раздел (параграфы)</h3></div>
-<!-- Измененные вызовы с эмодзи -->
-<button onclick="selectQuizSection('section_quiz', 'medium', '1-12', 'Контрольная работа по Разделу I', 'screen-section-quiz')">📜 Раздел I (Параграфы 1-12)</button>
-<button onclick="selectQuizSection('section_quiz', 'medium', '13-20', 'Контрольная работа по Разделу II', 'screen-section-quiz')">📜 Раздел II (Параграфы 13-20)</button>
-<button onclick="selectQuizSection('section_quiz', 'medium', '21-33', 'Контрольная работа по Разделу III', 'screen-section-quiz')">📜 Раздел III (Параграфы 21-33)</button>
-<button onclick="selectQuizSection('section_quiz', 'medium', '34-43', 'Контрольная работа по Разделу IV', 'screen-section-quiz')">📜 Раздел IV (34-43)</button>
+<div class="header"><h3>Выберите раздел (главу)</h3></div>
+<div id="section-quiz-buttons"></div>
 </div>
-
 <!-- ЭКРАН 6: Выбор параграфа для Лёгкого теста -->
 <div id="screen-easy-quiz-select" class="screen-container">
 <button onclick="showScreen('screen-main')">← Назад в меню</button>
 <div id="easy-buttons-grid" class="grid-buttons"></div>
 </div>
-
 <!-- ЭКРАН 7: Выбор параграфа для Тяжёлого теста -->
 <div id="screen-hard-quiz-select" class="screen-container">
 <button onclick="showScreen('screen-main')">← Назад в меню</button>
 <div id="hard-buttons-grid" class="grid-buttons"></div>
 </div>
-
 <!-- НОВЫЙ ЭКРАН 8: Подтверждение начала теста -->
 <div id="screen-quiz-start-confirmation" class="screen-container">
  <button id="back-from-quiz-confirm" onclick="showScreen('screen-main')">← Назад</button>
@@ -197,23 +201,18 @@ translateY(0); } }
  <p id="quiz-confirm-text">Начать тест по выбранному параграфу?</p>
  <button onclick="startConfirmedTest()" class="final-quiz-btn" style="background-color: #007bff;">▶️ Начать тест</button>
 </div>
-
 <!-- НОВЫЙ ЭКРАН 9: Справочные материалы (меню) -->
 <div id="screen-reference-materials" class="screen-container">
 <button onclick="showScreen('screen-main')">← Назад в меню</button>
 <div class="header"><h3>Справочные материалы</h3></div>
-<button onclick="showScreen('screen-textbook-content')" class="btn-content">📜 Содержание учебника по Истории России за 6 класс (автор В. Р. Мединский, А. В. Торкунов)</button>
-<button onclick="showScreen('screen-rurikovich-dynasty')" class="btn-dynasty">👑 Династия Рюриковичей в IX — начале XVI в.</button>
-<button onclick="showScreen('screen-historical-maps')" class="btn-maps">🗺️ Исторические карты</button>
+<div id="reference-buttons"></div>
 </div>
-
 <!-- НОВЫЙ ЭКРАН 10: Содержание учебника -->
 <div id="screen-textbook-content" class="screen-container">
 <button onclick="showScreen('screen-reference-materials')">← Назад к материалам</button>
-<div class="header"><h3>Содержание учебника по Истории России за 6 класс (автор В. Р. Мединский, А. В. Торкунов)</h3></div>
+<div class="header"><h3 id="textbook-content-title">Содержание учебника</h3></div>
 <div id="textbook-content-display"></div>
 </div>
-
 <!-- НОВЫЙ ЭКРАН 11: Династия Рюриковичей -->
 <div id="screen-rurikovich-dynasty" class="screen-container">
     <button onclick="showScreen('screen-reference-materials')">← Назад к материалам</button>
@@ -232,7 +231,15 @@ translateY(0); } }
         </a>
     </div>
 </div>
-
+<!-- ЭКРАН 11.1: Универсальный экран с одним изображением (карта/схема) -->
+<div id="screen-reference-image" class="screen-container">
+    <button onclick="showScreen('screen-reference-materials')">← Назад к материалам</button>
+    <div class="header">
+        <h3 id="reference-image-title">Изображение</h3>
+        <p style="font-size: 12px; color: var(--hint-color); margin-top: 4px;">👆 Нажмите на изображение для увеличения (зума) и оно откроется в хорошем качестве.</p>
+    </div>
+    <div id="reference-image-display" style="text-align: center; padding-bottom: 20px;"></div>
+</div>
 <!-- ЭКРАН 12: Исторические карты -->
 <div id="screen-historical-maps" class="screen-container" style="display: none;">
     <button onclick="showScreen('screen-reference-materials')" style="align-self: flex-start; margin-bottom: 15px; padding: 10px 20px; background-color: #007AFF; color: #ffffff; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; font-family: inherit;">
@@ -276,7 +283,7 @@ width: 100%; padding: 12px; background-color: var(--tg-theme-button-color); colo
 </div>
 <!-- ЭКРАН ОПРОСА (Вставлять ПЕРЕД тегом <script>) -->
 <div id="screen-survey" class="screen-container" style="display: none; padding: 20px;">
-    <button onclick="showScreen('screen-main')" style="margin-bottom: 15px;">← Назад</button>
+    <button id="survey-back-btn" onclick="backFromSurvey()" style="margin-bottom: 15px;">← Назад</button>
     
     <div style="width: 100%; background: var(--bg-color); height: 8px; border-radius: 10px; margin-bottom: 20px; overflow: hidden; border: 1px solid var(--hint-color);">
         <div id="survey-progress" style="width: 0%; height: 100%; background: #34c759; transition: width 0.3s ease;"></div>
@@ -293,7 +300,6 @@ width: 100%; padding: 12px; background-color: var(--tg-theme-button-color); colo
                 <option value="Контрольные работы">Контрольные работы</option>
             </select>
         </label>
-
         <label>2. Как часто заходите в приложение?
             <select name="usage_freq" required style="width:100%; padding:8px; margin-top:5px; border-radius:8px;">
                 <option value="" disabled selected>Выберите...</option>
@@ -303,21 +309,18 @@ width: 100%; padding: 12px; background-color: var(--tg-theme-button-color); colo
                 <option value="Первый раз">Первый раз</option>
             </select>
         </label>
-
         <label>3. Останетесь при ограничении бесплатного лимита на тесты (не более 2 раз в день)?
             <select name="limit_tests" required style="width:100%; padding:8px; margin-top:5px; border-radius:8px;">
                 <option value="Да">Да</option>
                 <option value="Нет">Нет</option>
             </select>
         </label>
-
         <label>4. Останетесь при ограничении бесплатного лимита на ВСЁ (не более 5 раз в день)?
             <select name="limit_all" required style="width:100%; padding:8px; margin-top:5px; border-radius:8px;">
                 <option value="Да">Да</option>
                 <option value="Нет">Нет</option>
             </select>
         </label>
-
         <label>5. Как удобнее платить?
             <select name="payment_model" required style="width:100%; padding:8px; margin-top:5px; border-radius:8px;">
                 <option value="Разово">Разово (19₽)</option>
@@ -332,22 +335,193 @@ width: 100%; padding: 12px; background-color: var(--tg-theme-button-color); colo
         <div style="font-size: 11px; color: var(--hint-color); line-height: 1.2;">
             Развитие приложения без вложений невозможно (сервера, нейросети). Помогите нам найти путь развития. 🙏
         </div>
-
         <button type="button" id="submit-survey-btn" onclick="sendSurveyData()" class="final-quiz-btn" style="background: #34c759; color: white; padding: 12px; border-radius: 12px; border: none; font-weight: bold;">Отправить ответы</button>
     </form>
 </div>
   
 <script>
 // --- ГЛОБАЛЬНЫЕ ФУНКЦИИ И ПЕРЕМЕННЫЕ ---
-const sectionQuestionsCount = {
-    "1-12": 17,  // Раздел I
-    "13-20": 13, // Раздел II
-    "21-33": 18, // Раздел III
-    "34-43": 15, // Раздел IV
-    "1-43": 48   // Итоговая работа
-};
 let tg = null; 
 let currentPId = null; 
+let currentClass = null; // Текущий выбранный класс (6 или 7)
+let currentCourse = null; // Текущий выбранный курс внутри класса
+
+// --- КОНФИГУРАЦИЯ КЛАССОВ ---
+// У класса может быть несколько курсов (7 класс: Всеобщая история и История России).
+// key — уникальный код курса, передаётся в n8n параметром course.
+// paragraphs — количество параграфов в учебнике; enabled — доступен ли курс.
+// sections — разделы/главы для контрольных работ (range "мин-макс" по Paragraph_id, final — итоговая).
+const CLASS_CONFIG = {
+    6: {
+        name: '6 класс',
+        courses: [
+            {
+                id: '6-russia', key: 'russia', name: 'История России', paragraphs: 43, enabled: true,
+                references: [
+                    { label: '📜 Содержание учебника', screen: 'screen-textbook-content', className: 'btn-content' },
+                    { label: '👑 Династия Рюриковичей в IX — начале XVI в.', screen: 'screen-rurikovich-dynasty', className: 'btn-dynasty' },
+                    { label: '🗺️ Исторические карты', screen: 'screen-historical-maps', className: 'btn-maps' }
+                ],
+                maps: [
+                    { title: 'Русь в IX–X вв.', file: 'map1.jpg' },
+                    { title: 'Русь в конце X — XI в.', file: 'map2.jpg' },
+                    { title: 'Русь в период раздробленности. 30-е гг. XII в. — первая четверть XIII в.', file: 'map3.jpg' },
+                    { title: 'Нашествие на Русь с востока и запада', file: 'map4.jpg' }
+                ],
+                sections: [
+                    { range: '1-12',  title: 'Раздел I',   label: 'Раздел I (Параграфы 1-12)' },
+                    { range: '13-20', title: 'Раздел II',  label: 'Раздел II (Параграфы 13-20)' },
+                    { range: '21-33', title: 'Раздел III', label: 'Раздел III (Параграфы 21-33)' },
+                    { range: '34-43', title: 'Раздел IV',  label: 'Раздел IV (Параграфы 34-43)' },
+                    { range: '1-43',  title: 'Итоговая контрольная работа', label: 'Итоговая контрольная работа', final: true }
+                ]
+            }
+        ]
+    },
+    7: {
+        name: '7 класс',
+        courses: [
+            {
+                id: '7-general', key: 'general', name: 'Всеобщая история', paragraphs: 23, enabled: true,
+                references: [
+                    { label: '📜 Содержание учебника', screen: 'screen-textbook-content', className: 'btn-content' },
+                    { label: '🗺️ Основные события всеобщей истории XVI—XVII вв.', screen: 'screen-reference-image', image: 'map7.1.JPG', className: 'btn-maps' },
+                    { label: '🗺️ Исторические карты', screen: 'screen-historical-maps', className: 'btn-maps' }
+                ],
+                maps: [
+                    { title: 'Карта 1. Европейские колонии в Южной и Центральной Америке', file: 'map7.2.JPG' },
+                    { title: 'Карта 2. Колонизация Северной Америки', file: 'map7.3.JPG' },
+                    { title: 'Карта 3. Образование державы Карла V и Дунайской монархии Габсбургов', file: 'map7.4.JPG' },
+                    { title: 'Карта 4. Война за независимость в Нидерландах', file: 'map7.5.JPG' },
+                    { title: 'Карта 5. Европа в середине XVII в.', file: 'map7.6.JPG' },
+                    { title: 'Карта 6. Страны Востока в XVI—XVII вв.', file: 'map7.7.JPG' }
+                ],
+                sections: [
+                    { range: '1-3',   title: 'Глава I',   label: 'Глава I (Параграфы 1-3)' },
+                    { range: '4-19',  title: 'Глава II',  label: 'Глава II (Параграфы 4-19)' },
+                    { range: '20-23', title: 'Глава III', label: 'Глава III (Параграфы 20-23)' },
+                    { range: '1-23',  title: 'Итоговая контрольная работа', label: 'Итоговая контрольная работа', final: true }
+                ]
+            },
+            {
+                id: '7-russia', key: 'russia', name: 'История России', paragraphs: 48, enabled: true,
+                references: [
+                    { label: '📜 Содержание учебника', screen: 'screen-textbook-content', className: 'btn-content' },
+                    { label: '🗺️ Основные события истории России 1533 — конца XVII в.', screen: 'screen-reference-image', image: 'map7.8.JPG', className: 'btn-maps' },
+                    { label: '🗺️ Исторические карты', screen: 'screen-historical-maps', className: 'btn-maps' }
+                ],
+                maps: [
+                    { title: 'Карта 1. Смутное время', file: 'map7.10.JPG' },
+                    { title: 'Карта 2. Экономика и народы Европейской России в XVII в.', file: 'map7.11.JPG' },
+                    { title: 'Карта 3. Народные восстания в XVII в.', file: 'map7.12.JPG' },
+                    { title: 'Карта 4. Внешняя политика России в XVII в.', file: 'map7.13.JPG' }
+                ],
+                sections: [
+                    { range: '1-19',  title: 'Глава I',   label: 'Глава I (Параграфы 1-19)' },
+                    { range: '20-28', title: 'Глава II',  label: 'Глава II (Параграфы 20-28)' },
+                    { range: '29-48', title: 'Глава III', label: 'Глава III (Параграфы 29-48)' },
+                    { range: '1-48',  title: 'Итоговая контрольная работа', label: 'Итоговая контрольная работа', final: true }
+                ]
+            }
+        ]
+    }
+};
+
+// Содержание учебников (для справочных материалов). Ключ — id курса.
+const COURSE_TOC = {
+    '6-russia': {
+        title: 'Содержание учебника по Истории России за 6 класс (автор В. Р. Мединский, А. В. Торкунов)',
+        text: "§ 1. Великое переселение народов. Восточная Европа и Северная Азия в 1-м тыс. н. э.\n" +
+              "§ 2–3. Восточные славяне и их соседи\n" +
+              "§ 4. Начало династии Рюриковичей\n" +
+              "§ 5–6. Русь при Игоре, Ольге, Святославе\n" +
+              "§ 7–8. Русь при Владимире Святом\n" +
+              "§ 9. Расцвет Руси при Ярославе Мудром\n" +
+              "§ 10–11. Наследники Ярослава Мудрого\n" +
+              "§ 12. Русь при Владимире Мономахе\n" +
+              "§ 13. Политическая раздробленность Руси\n" +
+              "§ 14–15. Владимиро-Суздальская земля\n" +
+              "§ 16–17. Новгородская земля\n" +
+              "§ 18. Юго-Западная Русь\n" +
+              "§ 19–20. Культура и быт в IX — начале XIII в.\n" +
+              "§ 21. Чингисхан и его империя\n" +
+              "§ 22–23. Натиск на русские земли с востока\n" +
+              "§ 24–25. Отражение агрессии с запада\n" +
+              "§ 26–27. Русские земли и Золотая Орда\n" +
+              "§ 28–29. Русь и Великое княжество Литовское\n" +
+              "§ 30. Северо-Восточная Русь в конце XIII — начале XIV в.\n" +
+              "§ 31. Возвышение Москвы\n" +
+              "§ 32–33. Победа на Куликовом поле\n" +
+              "§ 34–35. Московское княжество в конце XIV — первой половине XV в.\n" +
+              "§ 36–37. Иван III — государь всея Руси\n" +
+              "§ 38–39. Российское государство и общество во второй половине XV в.\n" +
+              "§ 40–41. Правление Василия III\n" +
+              "§ 42–43. Культура во второй половине XIII — первой трети XVI в."
+    },
+    '7-general': {
+        title: 'Содержание учебника по Всеобщей истории за 7 класс',
+        text: "Глава I. Эпоха Великих географических открытий\n" +
+              "§ 1. Мир на заре Нового времени\n" +
+              "§ 2. Великие географические открытия\n" +
+              "§ 3. Колониальные империи раннего Нового времени\n\n" +
+              "Глава II. Европа в XVI–XVII вв.: традиции и новизна\n" +
+              "§ 4. Сельский и городской мир в эпоху зарождения капитализма\n" +
+              "§ 5. Человек, общество, государство\n" +
+              "§ 6. Реформация и Контрреформация\n" +
+              "§ 7. Германские земли и держава австрийских Габсбургов\n" +
+              "§ 8. Испанская монархия\n" +
+              "§ 9. Нидерланды: путь к расцвету\n" +
+              "§ 10. Франция: становление абсолютизма\n" +
+              "§ 11. Англия в XVI — начале XVII в.\n" +
+              "§ 12. Век революций в Англии\n" +
+              "§ 13. Сила и слабость Речи Посполитой\n" +
+              "§ 14–15. Международные отношения в XVI–XVII вв.\n" +
+              "§ 16–17. Культура эпохи Возрождения\n" +
+              "§ 18. Культура XVII в.: барокко и классицизм\n" +
+              "§ 19. Научная революция\n\n" +
+              "Глава III. Страны Азии и Африки в XVI–XVII вв.\n" +
+              "§ 20. Османская империя и Иран: могущество и упадок\n" +
+              "§ 21. Индия в эпоху Великих Моголов\n" +
+              "§ 22. Китай и Япония: в поисках стабильности\n" +
+              "§ 23. Африка: разные судьбы государств и народов"
+    },
+    '7-russia': {
+        title: 'Содержание учебника по Истории России за 7 класс (автор В. Р. Мединский, А. В. Торкунов)',
+        text: "Глава I. Россия в XVI в.\n" +
+              "§ 1–2. Россия в 1533–1547 гг.\n" +
+              "§ 3–4. Начало царствования Ивана IV\n" +
+              "§ 5–6. Русское общество в XVI в.\n" +
+              "§ 7–8. Военные реформы Ивана IV и Избранной рады\n" +
+              "§ 9. Наследники Золотой Орды в середине XVI в.\n" +
+              "§ 10–11. Присоединение Поволжья. Начало Ливонской войны\n" +
+              "§ 12–13. Падение Избранной рады и введение опричнины\n" +
+              "§ 14–15. Завершение эпохи Ивана Грозного\n" +
+              "§ 16–17. Россия при царе Фёдоре Ивановиче\n" +
+              "§ 18. Развитие культуры в XVI в.\n" +
+              "§ 19. Духовная жизнь общества в XVI в.\n\n" +
+              "Глава II. Смута в России\n" +
+              "§ 20. В преддверии грозных испытаний: кризис власти и общества на рубеже XVI–XVII вв.\n" +
+              "§ 21–22. Начало Смуты. Самозванец на троне\n" +
+              "§ 23–24. Апогей Смуты. «Всеконечное разорение»\n" +
+              "§ 25–26. Спасители Отечества\n" +
+              "§ 27–28. Завершение Смуты и иностранной интервенции\n\n" +
+              "Глава III. Россия при первых Романовых\n" +
+              "§ 29–30. «Куда соха ходила…» Социально-экономическое развитие России в XVII в.\n" +
+              "§ 31. Сословия в XVII в.: верхи общества\n" +
+              "§ 32. Сословия в XVII в.: низы общества\n" +
+              "§ 33–34. Государственное устройство России в XVII в.\n" +
+              "§ 35. Внутренняя политика царя Алексея Михайловича\n" +
+              "§ 36–37. «Государство правит по своей воле…» На путях к абсолютной монархии\n" +
+              "§ 38–39. Русская церковь в XVII в.\n" +
+              "§ 40–41. Социальное противостояние в XVII в.\n" +
+              "§ 42–43. Внешняя политика России в XVII в.\n" +
+              "§ 44. «Встречь солнцу». Освоение Сибири и Дальнего Востока\n" +
+              "§ 45. Внутренняя политика царя Фёдора Алексеевича\n" +
+              "§ 46–47. Культура России в XVII в.\n" +
+              "§ 48. Мир человека в XVII в."
+    }
+};
+
 // Переменные для сохранения контекста теста
 let currentTestAction = null; 
 let currentTestDifficulty = null;
@@ -356,6 +530,55 @@ let correctAnswersCount = 0;
 let incorrectAnswersCount = 0;
 let currentQuestionIndex = 0;
 let quizDataArray = []; 
+
+// --- ВЫБОР КЛАССА ---
+function selectClass(cls) {
+    currentClass = cls;
+    currentCourse = null;
+    const cfg = CLASS_CONFIG[cls];
+    const courses = cfg.courses.filter(c => c.enabled);
+    if (courses.length === 1) {
+        setCourse(courses[0]);
+        return;
+    }
+    // Несколько курсов — показываем экран выбора курса
+    document.getElementById('course-select-subtitle').innerText = cfg.name + ' — выберите курс';
+    const box = document.getElementById('course-buttons');
+    box.innerHTML = '';
+    courses.forEach(c => {
+        const b = document.createElement('button');
+        b.className = 'btn-list';
+        b.style.cssText = 'padding: 22px; font-size: 18px; border-radius: 16px; margin-bottom: 10px;';
+        b.innerText = c.name;
+        b.onclick = () => setCourse(c);
+        box.appendChild(b);
+    });
+    showScreen('screen-course-select');
+}
+// Выбор конкретного курса и переход в меню класса
+function setCourse(course) {
+    currentCourse = course;
+    document.getElementById('class-menu-subtitle').innerText = CLASS_CONFIG[currentClass].name + ' — ' + course.name;
+    document.getElementById('paragraph-count-label').innerText = course.paragraphs + ' шт';
+    generateParagraphButtons();
+    generateQuizButtons('easy-buttons-grid', 'easy', 'screen-easy-quiz-select');
+    generateQuizButtons('hard-buttons-grid', 'hard', 'screen-hard-quiz-select');
+    renderSectionQuizButtons();
+    showScreen('screen-main');
+}
+function backToClassSelect() {
+    currentClass = null;
+    currentCourse = null;
+    showScreen('screen-class-select');
+}
+// Возврат из опроса: в меню класса, если он выбран, иначе на выбор класса
+function backFromSurvey() {
+    showScreen(currentClass !== null ? 'screen-main' : 'screen-class-select');
+}
+// Проверка: включены ли материалы текущего курса (для заглушек)
+function isClassEnabled() {
+    return currentClass !== null && currentCourse !== null && currentCourse.enabled;
+}
 
 function showScreen(screenId) {
   // Скрываем кнопки опроса при каждом переключении
@@ -372,49 +595,20 @@ function showScreen(screenId) {
 
     // 1. Содержание учебника
     if (screenId === 'screen-textbook-content') {
-        const contentEl = document.getElementById('textbook-content-display');
-        contentEl.innerText = "§ 1. Великое переселение народов. Восточная Европа и Северная Азия в 1-м тыс. н. э. (p. 1)\n" +
-                              "§ 2–3. Восточные славяне и их соседи (p. 1)\n" +
-                              "§ 4. Начало династии Рюриковичей (p. 1)\n" +
-                              "§ 5–6. Русь при Игоре, Ольге, Святославе (p. 1)\n" +
-                              "§ 7–8. Русь при Владимире Святом (p. 1)\n" +
-                              "§ 9. Расцвет Руси при Ярославе Мудром (p. 1)\n" +
-                              "§ 10–11. Наследники Ярослава Мудрого (p. 1)\n" +
-                              "§ 12. Русь при Владимире Мономахе (p. 1)\n" +
-                              "§ 13. Политическая раздробленность Руси (p. 1)\n" +
-                              "§ 14–15. Владимиро-Суздальская земля (p. 1)\n" +
-                              "§ 16–17. Новгородская земля (p. 1)\n" +
-                              "§ 18. Юго-Западная Русь (p. 1)\n" +
-                              "§ 19–20. Культура и быт в IX — начале XIII в. (p. 1)\n" +
-                              "§ 21. Чингисхан и его империя (p. 1)\n" +
-                              "§ 22–23. Натиск на русские земли с востока (p. 1)\n" +
-                              "§ 24–25. Отражение агрессии с запада (p. 1)\n" +
-                              "§ 26–27. Русские земли и Золотая Орда (p. 1)\n" +
-                              "§ 28–29. Русь и Великое княжество Литовское (p. 2)\n" +
-                              "§ 30. Северо-Восточная Русь в конце XIII — начале XIV в. (p. 2)\n" +
-                              "§ 31. Возвышение Москвы (p. 2)\n" +
-                              "§ 32–33. Победа на Куликовом поле (p. 2)\n" +
-                              "§ 34–35. Московское княжество в конце XIV — первой половине XV в. (p. 2)\n" +
-                              "§ 36–37. Иван III — государь всея Руси (p. 2)\n" +
-                              "§ 38–39. Российское государство и общество во второй половине XV в. (p. 2)\n" +
-                              "§ 40–41. Правление Василия III (p. 2)\n" +
-                              "§ 42–43. Культура во второй половине XIII — первой трети XVI в. (p. 2)";
+        const toc = currentCourse ? COURSE_TOC[currentCourse.id] : null;
+        document.getElementById('textbook-content-title').innerText = toc ? toc.title : 'Содержание учебника';
+        document.getElementById('textbook-content-display').innerText = toc ? toc.text : '';
     } 
     // 2. Династия Рюриковичей
     else if (screenId === 'screen-rurikovich-dynasty') {
         // Здесь ваша логика для династии
     } 
-    // 3. ИСТОРИЧЕСКИЕ КАРТЫ (ОБНОВЛЕНО)
+    // 3. ИСТОРИЧЕСКИЕ КАРТЫ (ОБНОВЛЕНО) — карты берутся из текущего курса
     else if (screenId === 'screen-historical-maps') {
         const mapsDisplayEl = document.getElementById('historical-maps-display');
         mapsDisplayEl.innerHTML = ''; // Очищаем контейнер
 
-        const mapsData = [
-            { title: "Русь в IX–X вв.", file: "map1.jpg" },
-            { title: "Русь в конце X — XI в.", file: "map2.jpg" },
-            { title: "Русь в период раздробленности. 30-е гг. XII в. - первая четверть XIII в.", file: "map3.jpg" },
-            { title: "Нашествие на Русь с востока и запада", file: "map4.jpg" }
-        ];
+        const mapsData = (currentCourse && currentCourse.maps) ? currentCourse.maps : [];
 
         mapsData.forEach(item => {
             const mapWrapper = document.createElement('div');
@@ -446,8 +640,11 @@ function showScreen(screenId) {
             mapsDisplayEl.appendChild(mapWrapper);
         });
     }
+    // 4. Справочные материалы: рендерим пункты текущего курса
+    else if (screenId === 'screen-reference-materials') {
+        renderReferenceButtons();
+    }
 }
-
 // ЭТА ФУНКЦИЯ ТЕПЕРЬ ОТВЕЧАЕТ ЗА ПЕРЕХОД НА ЭКРАН ПОДТВЕРЖДЕНИЯ ТЕСТА
 function selectQuizParagraph(pId, difficulty, action, returnScreenId) {
  currentTestAction = action;
@@ -463,7 +660,6 @@ document.getElementById('quiz-confirm-text').innerText = `Начать тест 
  document.getElementById('back-from-quiz-confirm').onclick = () => showScreen(returnScreenId);
  showScreen('screen-quiz-start-confirmation');
 }
-
 // НОВАЯ ФУНКЦИЯ: Запуск теста после подтверждения
 function startConfirmedTest() {
  if (currentTestAction && currentTestSpecificId) {
@@ -473,16 +669,20 @@ function startConfirmedTest() {
   showScreen('screen-main');
  }
 }
-
 // НОВАЯ ФУНКЦИЯ: для контрольных работ по разделам (использует тот же экран подтверждения)
 function selectQuizSection(action, difficulty, specificId, titleText, returnScreenId) {
+    // Заглушка: контрольные для класса ещё не подключены
+    if (!isClassEnabled()) {
+        alert('🚧 Контрольные работы для ' + (currentClass ? currentClass + ' класса' : 'этого класса') + ' скоро появятся!');
+        return;
+    }
     currentTestAction = action;
     currentTestDifficulty = difficulty;
     currentTestSpecificId = specificId;
     currentPId = specificId;
   
-        // Получаем количество вопросов из нашего справочника по ключу specificId (например "1-12")
-    const count = sectionQuestionsCount[specificId] || "неизвестно";
+        // Количество вопросов: 1 лёгкий из каждого параграфа диапазона + 5 тяжёлых
+    const count = getSectionQuestionCount(specificId);
         document.getElementById('quiz-confirm-title').innerText = `${titleText}`;
     
     // ИЗМЕНЕННАЯ СТРОКА:
@@ -490,14 +690,97 @@ function selectQuizSection(action, difficulty, specificId, titleText, returnScre
         document.getElementById('back-from-quiz-confirm').onclick = () => showScreen(returnScreenId);
     showScreen('screen-quiz-start-confirmation');
 }
-
-
+// Считает число вопросов контрольной по диапазону "мин-макс" (1 вопрос с параграфа + 5 тяжёлых)
+function getSectionQuestionCount(rangeStr) {
+    const parts = String(rangeStr).split('-').map(Number);
+    if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
+        return (parts[1] - parts[0] + 1) + 5;
+    }
+    return 'неизвестно';
+}
 // Функция handleApiCall была удалена, так как заменена функцией selectQuizSection
 // function handleApiCall(...) { ... }
 
+// Контрольные работы по разделам/главам — строятся динамически по текущему курсу
+function renderSectionQuizButtons() {
+    const course = currentCourse;
+    const container = document.getElementById('section-quiz-buttons');
+    const sectionBtn = document.getElementById('section-quiz-menu-btn');
+    const finalBtn = document.getElementById('final-quiz-menu-btn');
+    if (!course || !course.sections || course.sections.length === 0) {
+        if (container) container.innerHTML = '';
+        if (sectionBtn) sectionBtn.style.display = 'none';
+        if (finalBtn) finalBtn.style.display = 'none';
+        return;
+    }
+    if (sectionBtn) sectionBtn.style.display = '';
+    if (finalBtn) finalBtn.style.display = '';
+    if (container) {
+        container.innerHTML = '';
+        course.sections.filter(s => !s.final).forEach(s => {
+            const b = document.createElement('button');
+            b.className = 'btn-section';
+            b.innerText = '📜 ' + s.label;
+            b.onclick = () => selectQuizSection('section_quiz', 'medium', s.range, 'Контрольная работа по ' + s.title, 'screen-section-quiz');
+            container.appendChild(b);
+        });
+    }
+    const finalSec = course.sections.find(s => s.final);
+    if (finalBtn && finalSec) {
+        finalBtn.onclick = () => selectQuizSection('section_quiz', 'medium', finalSec.range, finalSec.title, 'screen-main');
+    }
+}
+// Справочные материалы — пункты строятся по текущему курсу
+function renderReferenceButtons() {
+    const container = document.getElementById('reference-buttons');
+    if (!container) return;
+    container.innerHTML = '';
+    const course = currentCourse;
+    if (!course || !course.references || course.references.length === 0) {
+        const p = document.createElement('p');
+        p.innerText = '🚧 Справочные материалы для этого курса скоро появятся.';
+        p.style.cssText = 'color: var(--hint-color); text-align: center; padding: 20px;';
+        container.appendChild(p);
+        return;
+    }
+    course.references.forEach(ref => {
+        const b = document.createElement('button');
+        b.className = ref.className || 'btn-content';
+        b.innerText = ref.label;
+        b.onclick = ref.image ? () => showReferenceImage(ref.label, ref.image) : () => showScreen(ref.screen);
+        container.appendChild(b);
+    });
+}
+// Показывает одно изображение (карту/схему) на универсальном экране
+function showReferenceImage(title, file) {
+    document.getElementById('reference-image-title').innerText = title;
+    const display = document.getElementById('reference-image-display');
+    display.innerHTML = '';
+    const a = document.createElement('a');
+    a.href = `https://cdn.jsdelivr.net/gh/hisedu/images@main/${file}`;
+    a.target = '_blank';
+    a.style.cssText = 'display: block; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.2);';
+    const img = document.createElement('img');
+    img.src = `https://cdn.jsdelivr.net/gh/hisedu/images@main/${file}`;
+    img.alt = title;
+    img.style.cssText = 'width: 100%; display: block; cursor: zoom-in;';
+    a.appendChild(img);
+    display.appendChild(a);
+    showScreen('screen-reference-image');
+}
+
 function generateParagraphButtons() {
 const grid = document.getElementById('paragraph-buttons-grid');
-for (let i = 1; i <= 43; i++) {
+grid.innerHTML = '';
+const count = currentCourse ? currentCourse.paragraphs : 0;
+if (!count) {
+    const note = document.createElement('p');
+    note.innerText = '🚧 Список параграфов для этого класса появится после подключения учебника.';
+    note.style.color = 'var(--hint-color)';
+    grid.appendChild(note);
+    return;
+}
+for (let i = 1; i <= count; i++) {
 const button = document.createElement('button');
 button.textContent = i;
 button.onclick = () => selectParagraph(i);
@@ -509,7 +792,8 @@ function generateQuizButtons(containerId, difficulty, returnScreenId) {
 const grid = document.getElementById(containerId);
 if (!grid) return;
 grid.innerHTML = '';
-for (let i = 1; i <= 43; i++) {
+const count = currentCourse ? currentCourse.paragraphs : 0;
+for (let i = 1; i <= count; i++) {
 const button = document.createElement('button');
 button.textContent = i;
 // Теперь onclick вызывает промежуточный экран с правильным параметром action
@@ -525,6 +809,11 @@ showScreen('screen-paragraph-actions');
 }
 // !!! ГЛАВНАЯ ФУНКЦИЯ API CALL ОСТАЕТСЯ БЕЗ ИЗМЕНЕНИЙ В ЛОГИКЕ !!!
 async function apiCall(action, difficulty = 'medium', specificId = null) {
+ // Заглушка: материалы класса ещё не подключены
+ if (!isClassEnabled()) {
+  alert('🚧 Материалы для ' + (currentClass ? currentClass + ' класса' : 'этого класса') + ' скоро появятся!');
+  return;
+ }
  const display = document.getElementById('result-text');
  const quizWrapper = document.getElementById('quiz-wrapper');
  const resultWrapper = document.getElementById('result-wrapper');
@@ -550,7 +839,7 @@ async function apiCall(action, difficulty = 'medium', specificId = null) {
   let finalPId = specificId || currentPId || 'N/A';
  
   const url = 
-  `${targetUrl}?id=${finalPId}&action=${action}&diff=${difficulty}&auth=${encodeURIComponent(tg.initData)}`;
+  `${targetUrl}?id=${finalPId}&action=${action}&diff=${difficulty}&class=${currentClass || ''}&course=${currentCourse ? currentCourse.key : ''}&auth=${encodeURIComponent(tg.initData)}`;
   const response = await fetch(url);
   const dataString = await response.text(); 
     const quizDataArrayParsed = tryParseJson(dataString);
@@ -791,11 +1080,10 @@ if (window.Telegram && window.Telegram.WebApp) {
 tg = window.Telegram.WebApp; 
 tg.expand();
 tg.ready();
-generateParagraphButtons();
 // Передаем ID экрана возврата для правильной работы кнопки "назад"
 generateQuizButtons('easy-buttons-grid', 'easy', 'screen-easy-quiz-select');
 generateQuizButtons('hard-buttons-grid', 'hard', 'screen-hard-quiz-select');
-showScreen('screen-main');
+showScreen('screen-class-select');
 } else {
 setTimeout(initWebApp, 100); 
 }
@@ -843,7 +1131,7 @@ async function sendSurveyData() {
         if (response.ok) {
             alert('Спасибо! Ваши ответы приняты.');
             localStorage.setItem('survey_completed', 'true');
-            showScreen('screen-main');
+            showScreen(currentClass !== null ? 'screen-main' : 'screen-class-select');
             form.reset();
             if (typeof updateProgress === 'function') updateProgress();
         } else {
@@ -860,24 +1148,3 @@ async function sendSurveyData() {
 </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
