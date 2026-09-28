@@ -136,8 +136,10 @@ translateY(0); } }
 <!-- ЭКРАН 0: Выбор класса -->
 <div id="screen-class-select" class="screen-container">
 <div class="header"><h1>История для всех</h1><p>Выберите класс</p></div>
+<button onclick="selectClass(5)" class="btn-list" style="padding: 22px; font-size: 18px; border-radius: 16px;">🎓 5 КЛАСС</button>
 <button onclick="selectClass(6)" class="btn-list" style="padding: 22px; font-size: 18px; border-radius: 16px;">🎓 6 КЛАСС</button>
 <button onclick="selectClass(7)" class="btn-section" style="padding: 22px; font-size: 18px; border-radius: 16px;">🎓 7 КЛАСС</button>
+<button onclick="selectClass(8)" class="btn-list" style="padding: 22px; font-size: 18px; border-radius: 16px;">🎓 8 КЛАСС</button>
 <button onclick="showScreen('screen-survey')" class="btn-mcko" style="margin-top: 10px; background-color: #6f42c1;">📝 !!! Пройдите опрос !!!</button>
 </div>
 
@@ -354,6 +356,39 @@ let currentCourse = null; // Текущий выбранный курс внут
 // paragraphs — количество параграфов в учебнике; enabled — доступен ли курс.
 // sections — разделы/главы для контрольных работ (range "мин-макс" по Paragraph_id, final — итоговая).
 const CLASS_CONFIG = {
+    5: {
+        name: '5 класс',
+        courses: [
+            {
+                id: '5-russia', key: 'russia', name: 'История', paragraphs: 55, enabled: true,
+                references: [
+                    { label: '📜 Содержание учебника', screen: 'screen-textbook-content', className: 'btn-content' },
+                    { label: '🗺️ Основные события истории Древнего мира', screen: 'screen-reference-image', images: ['map5.1.JPG', 'map5.2.JPG'], className: 'btn-maps' },
+                    { label: '🗺️ Исторические карты', screen: 'screen-historical-maps', className: 'btn-maps' }
+                ],
+                maps: [
+                    { title: 'Карта 1', file: 'map5.3.JPG' },
+                    { title: 'Карта 2', file: 'map5.4.JPG' },
+                    { title: 'Карта 3', file: 'map5.5.JPG' },
+                    { title: 'Карта 4', file: 'map5.6.JPG' },
+                    { title: 'Карта 5', file: 'map5.7.JPG' },
+                    { title: 'Карта 6', file: 'map5.8.JPG' },
+                    { title: 'Карта 7', file: 'map5.9.JPG' },
+                    { title: 'Карта 8', file: 'map5.10.JPG' },
+                    { title: 'Карта 9', file: 'map5.11.JPG' },
+                    { title: 'Карта 10', file: 'map5.12.JPG' },
+                    { title: 'Карта 11', file: 'map5.13.JPG' }
+                ],
+                sections: [
+                    { range: '1-4',   title: 'Глава I',   label: 'Глава I (Параграфы 1-4)' },
+                    { range: '5-19',  title: 'Глава II',  label: 'Глава II (Параграфы 5-19)' },
+                    { range: '20-37', title: 'Глава III', label: 'Глава III (Параграфы 20-37)' },
+                    { range: '38-55', title: 'Глава IV',  label: 'Глава IV (Параграфы 38-55)' },
+                    { range: '1-55',  title: 'Итоговая контрольная работа', label: 'Итоговая контрольная работа', final: true }
+                ]
+            }
+        ]
+    },
     6: {
         name: '6 класс',
         courses: [
@@ -409,7 +444,7 @@ const CLASS_CONFIG = {
                 id: '7-russia', key: 'russia', name: 'История России', paragraphs: 48, enabled: true,
                 references: [
                     { label: '📜 Содержание учебника', screen: 'screen-textbook-content', className: 'btn-content' },
-                    { label: '🗺️ Основные события истории России 1533 — конца XVII в.', screen: 'screen-reference-image', image: 'map7.8.JPG', className: 'btn-maps' },
+                    { label: '🗺️ Основные события истории России 1533 — конца XVII в.', screen: 'screen-reference-image', images: ['map7.8.JPG', 'map7.9.JPG'], className: 'btn-maps' },
                     { label: '🗺️ Исторические карты', screen: 'screen-historical-maps', className: 'btn-maps' }
                 ],
                 maps: [
@@ -426,11 +461,102 @@ const CLASS_CONFIG = {
                 ]
             }
         ]
+    },
+    8: {
+        name: '8 класс',
+        courses: [
+            {
+                id: '8-russia', key: 'russia', name: 'История России', paragraphs: 54, enabled: true,
+                references: [
+                    { label: '📜 Содержание учебника', screen: 'screen-textbook-content', className: 'btn-content' },
+                    { label: '👑 Романовы на русском престоле (1645—1796)', screen: 'screen-reference-image', image: 'map8.1.JPG', className: 'btn-dynasty' },
+                    { label: '🏛️ Местное управление по реформе Екатерины II', screen: 'screen-reference-image', image: 'map8.2.JPG', className: 'btn-content' },
+                    { label: '🗺️ Основные события истории России конца XVII — первой четверти XIX в.', screen: 'screen-reference-image', image: 'map8.3.JPG', className: 'btn-maps' },
+                    { label: '🗺️ Исторические карты', screen: 'screen-historical-maps', className: 'btn-maps' }
+                ],
+                maps: [
+                    { title: 'Карта 1. Северная война 1700—1721 гг.', file: 'map8.4.JPG' },
+                    { title: 'Карта 2. Участие России в Семилетней войне 1756—1763 гг.', file: 'map8.5.JPG' },
+                    { title: 'Карта 3. Россия во второй половине XVIII в. (европейская часть)', file: 'map8.6.JPG' },
+                    { title: 'Карта 4. Русско-турецкая война 1768—1774 гг.', file: 'map8.7.JPG' },
+                    { title: 'Карта 5. Русско-турецкая война 1787—1791 гг.', file: 'map8.8.JPG' },
+                    { title: 'Карта 6. Разделы Речи Посполитой', file: 'map8.9.JPG' },
+                    { title: 'Карты 7—8. Вторжение и изгнание армии Наполеона (1812)', file: 'map8.10.JPG' }
+                ],
+                sections: [
+                    { range: '1-18',  title: 'Глава I',   label: 'Глава I (Параграфы 1-18)' },
+                    { range: '19-22', title: 'Глава II',  label: 'Глава II (Параграфы 19-22)' },
+                    { range: '23-40', title: 'Глава III', label: 'Глава III (Параграфы 23-40)' },
+                    { range: '41-45', title: 'Глава IV',  label: 'Глава IV (Параграфы 41-45)' },
+                    { range: '46-54', title: 'Глава V',   label: 'Глава V (Параграфы 46-54)' },
+                    { range: '1-54',  title: 'Итоговая контрольная работа', label: 'Итоговая контрольная работа', final: true }
+                ]
+            }
+        ]
     }
 };
 
 // Содержание учебников (для справочных материалов). Ключ — id курса.
 const COURSE_TOC = {
+    '5-russia': {
+        title: 'Содержание учебника по Истории Древнего мира за 5 класс',
+        text: "Глава I. Первобытное общество\n" +
+              "§ 1. Древнейшие люди\n" +
+              "§ 2. Первобытные охотники и собиратели\n" +
+              "§ 3. Верования и искусство\n" +
+              "§ 4. Возникновение земледелия, скотоводства и ремесла\n\n" +
+              "Глава II. Древний Восток\n" +
+              "§ 5. Возникновение Древнеегипетского государства\n" +
+              "§ 6–7. Общество Древнего Египта\n" +
+              "§ 8. Расцвет Древнеегипетского государства\n" +
+              "§ 9. Религия Древнего Египта\n" +
+              "§ 10. Наука и искусство в Древнем Египте\n" +
+              "§ 11. Возникновение первых государств в Древнем Междуречье\n" +
+              "§ 12. Вавилонское царство\n" +
+              "§ 13. Финикия\n" +
+              "§ 14. Древняя Палестина\n" +
+              "§ 15. Ассирийская держава\n" +
+              "§ 16. Персидское царство\n" +
+              "§ 17. Древняя Индия\n" +
+              "§ 18. Древний Китай\n" +
+              "§ 19. Религия и культура Древней Индии и Древнего Китая\n\n" +
+              "Глава III. Древняя Греция\n" +
+              "§ 20. Начало греческой цивилизации\n" +
+              "§ 21. Верования древних греков\n" +
+              "§ 22. Поэмы Гомера\n" +
+              "§ 23. Государство-полис в Древней Греции\n" +
+              "§ 24. Великая греческая колонизация\n" +
+              "§ 25. Северное Причерноморье\n" +
+              "§ 26. Древние Афины\n" +
+              "§ 27. Древняя Спарта\n" +
+              "§ 28. Греко-персидские войны\n" +
+              "§ 29. Афинская демократия\n" +
+              "§ 30. Культура Древней Греции\n" +
+              "§ 31. Повседневная жизнь древних греков\n" +
+              "§ 32. Наука в Древней Греции\n" +
+              "§ 33. Театр в жизни древних греков\n" +
+              "§ 34. Священный огонь Олимпии\n" +
+              "§ 35. Ослабление Эллады. Возвышение Македонии\n" +
+              "§ 36. Походы Александра Македонского на Восток\n" +
+              "§ 37. Культура царства Птолемеев\n\n" +
+              "Глава IV. Древний Рим\n" +
+              "§ 38. Начало римской истории\n" +
+              "§ 39. Семь римских царей\n" +
+              "§ 40. Установление республики\n" +
+              "§ 41. Нравы, обычаи, религия\n" +
+              "§ 42. Завоевание Римом Италии\n" +
+              "§ 43. Пунические войны\n" +
+              "§ 44. Завоевание Восточного Средиземноморья\n" +
+              "§ 45. Гражданские войны\n" +
+              "§ 46–47. Рабство в Риме\n" +
+              "§ 48. Римское государство в I веке до н. э.\n" +
+              "§ 49. Римская империя\n" +
+              "§ 50. Династии римских императоров\n" +
+              "§ 51. Возникновение христианства\n" +
+              "§ 52–53. Наука и культура Древнего Рима\n" +
+              "§ 54. Быт и досуг римлян\n" +
+              "§ 55. Поздняя империя"
+    },
     '6-russia': {
         title: 'Содержание учебника по Истории России за 6 класс (автор В. Р. Мединский, А. В. Торкунов)',
         text: "§ 1. Великое переселение народов. Восточная Европа и Северная Азия в 1-м тыс. н. э.\n" +
@@ -521,6 +647,49 @@ const COURSE_TOC = {
               "§ 45. Внутренняя политика царя Фёдора Алексеевича\n" +
               "§ 46–47. Культура России в XVII в.\n" +
               "§ 48. Мир человека в XVII в."
+    },
+    '8-russia': {
+        title: 'Содержание учебника по Истории России за 8 класс',
+        text: "Глава I. Рождение Российской империи\n" +
+              "§ 1–2. Борьба за власть в конце XVII в.\n" +
+              "§ 3. Пётр I: становление реформатора\n" +
+              "§ 4. Начало Петровских преобразований\n" +
+              "§ 5–6. Северная война: от Нарвы до Полтавы\n" +
+              "§ 7–8. Северная война: «Полтавская виктория»\n" +
+              "§ 9. Северная война: от Полтавы до Ништадтского мира\n" +
+              "§ 10. Строительство империи: трансформация власти\n" +
+              "§ 11–12. Парад реформ: модернизация по-петровски\n" +
+              "§ 13. Цена войны\n" +
+              "§ 14. Общество и государство в период реформ\n" +
+              "§ 15–16. Петербург в первой четверти XVIII в.\n" +
+              "§ 17–18. Преображённая Россия\n\n" +
+              "Глава II. Россия после Петра I. Дворцовые перевороты\n" +
+              "§ 19–20. Эпоха дворцовых переворотов (1725–1762)\n" +
+              "§ 21–22. По заветам Петра Великого\n\n" +
+              "Глава III. Россия в 1760–1790-х гг. Правление Екатерины II и Павла I\n" +
+              "§ 23–24. «Законная монархия» Екатерины II\n" +
+              "§ 25–26. Кто и как присоединялся к России\n" +
+              "§ 27–28. Экономика России во второй половине XVIII в.: хозяйство империи\n" +
+              "§ 29–30. Общество века реформ: «благородные» и «подлые»\n" +
+              "§ 31–32. Социальный протест\n" +
+              "§ 33–34. Внешняя политика Екатерины II: южное и восточное направления\n" +
+              "§ 35–36. Начало освоения Новороссии и Крыма\n" +
+              "§ 37. Внешняя политика Екатерины II: западное направление\n" +
+              "§ 38. «Непросвещённый абсолютизм»: внутренняя политика Павла I\n" +
+              "§ 39. Внешняя политика Павла I\n" +
+              "§ 40. «Государство при армии»: жизнь и служба в императорских войсках в XVIII в.\n\n" +
+              "Глава IV. Культурное пространство Российской империи в XVIII в.\n" +
+              "§ 41–42. Публицистика, литература, театр\n" +
+              "§ 43. Развитие образования\n" +
+              "§ 44. Развитие науки и техники\n" +
+              "§ 45. Архитектура и искусство\n\n" +
+              "Глава V. Политика правительства Александра I\n" +
+              "§ 46. Первые мероприятия нового императора\n" +
+              "§ 47–48. Внешняя политика России в 1801–1811 гг.\n" +
+              "§ 49–50. «Недаром помнит вся Россия…»\n" +
+              "§ 51. Заграничные походы русской армии. Венский конгресс\n" +
+              "§ 52. Либеральные и консервативные тенденции в политике Александра I в 1815–1825 гг.\n" +
+              "§ 53–54. Общественное движение в первой четверти XIX в. Восстание декабристов"
     }
 };
 
@@ -749,25 +918,30 @@ function renderReferenceButtons() {
         const b = document.createElement('button');
         b.className = ref.className || 'btn-content';
         b.innerText = ref.label;
-        b.onclick = ref.image ? () => showReferenceImage(ref.label, ref.image) : () => showScreen(ref.screen);
+        b.onclick = (ref.image || ref.images)
+            ? () => showReferenceImage(ref.label, ref.images || ref.image)
+            : () => showScreen(ref.screen);
         container.appendChild(b);
     });
 }
-// Показывает одно изображение (карту/схему) на универсальном экране
-function showReferenceImage(title, file) {
+// Показывает одно или несколько изображений на универсальном экране
+function showReferenceImage(title, files) {
     document.getElementById('reference-image-title').innerText = title;
     const display = document.getElementById('reference-image-display');
     display.innerHTML = '';
-    const a = document.createElement('a');
-    a.href = `https://cdn.jsdelivr.net/gh/hisedu/images@main/${file}`;
-    a.target = '_blank';
-    a.style.cssText = 'display: block; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.2);';
-    const img = document.createElement('img');
-    img.src = `https://cdn.jsdelivr.net/gh/hisedu/images@main/${file}`;
-    img.alt = title;
-    img.style.cssText = 'width: 100%; display: block; cursor: zoom-in;';
-    a.appendChild(img);
-    display.appendChild(a);
+    const list = Array.isArray(files) ? files : [files];
+    list.forEach(file => {
+        const a = document.createElement('a');
+        a.href = `https://cdn.jsdelivr.net/gh/hisedu/images@main/${file}`;
+        a.target = '_blank';
+        a.style.cssText = 'display: block; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.2); margin-bottom: 16px;';
+        const img = document.createElement('img');
+        img.src = `https://cdn.jsdelivr.net/gh/hisedu/images@main/${file}`;
+        img.alt = title;
+        img.style.cssText = 'width: 100%; display: block; cursor: zoom-in;';
+        a.appendChild(img);
+        display.appendChild(a);
+    });
     showScreen('screen-reference-image');
 }
 
