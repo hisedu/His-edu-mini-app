@@ -61,6 +61,11 @@ translateY(0); } }
 .btn-test { background-color: #ffc107; color: black; }
 .final-quiz-btn { background-color: #28a745; color: white; margin-top: 10px; }
 .btn-section { background-color: #6f42c1; color: white; }
+/* Цвета кнопок выбора класса */
+.btn-class-5 { background-color: #28a745; color: white; }
+.btn-class-6 { background-color: #007bff; color: white; }
+.btn-class-7 { background-color: #6f42c1; color: white; }
+.btn-class-8 { background-color: #fd7e14; color: white; }
 /* Новый класс для кнопки МЦКО */
 .btn-mcko { background-color: #e67e22; color: white; }
 .btn-reference { background-color: var(--reference-color); color: white; }
@@ -136,10 +141,10 @@ translateY(0); } }
 <!-- ЭКРАН 0: Выбор класса -->
 <div id="screen-class-select" class="screen-container">
 <div class="header"><h1>История для всех</h1><p>Выберите класс</p></div>
-<button onclick="selectClass(5)" class="btn-list" style="padding: 22px; font-size: 18px; border-radius: 16px;">🎓 5 КЛАСС</button>
-<button onclick="selectClass(6)" class="btn-list" style="padding: 22px; font-size: 18px; border-radius: 16px;">🎓 6 КЛАСС</button>
-<button onclick="selectClass(7)" class="btn-section" style="padding: 22px; font-size: 18px; border-radius: 16px;">🎓 7 КЛАСС</button>
-<button onclick="selectClass(8)" class="btn-list" style="padding: 22px; font-size: 18px; border-radius: 16px;">🎓 8 КЛАСС</button>
+<button onclick="selectClass(5)" class="btn-class-5" style="padding: 22px; font-size: 18px; border-radius: 16px;">🎓 5 КЛАСС</button>
+<button onclick="selectClass(6)" class="btn-class-6" style="padding: 22px; font-size: 18px; border-radius: 16px;">🎓 6 КЛАСС</button>
+<button onclick="selectClass(7)" class="btn-class-7" style="padding: 22px; font-size: 18px; border-radius: 16px;">🎓 7 КЛАСС</button>
+<button onclick="selectClass(8)" class="btn-class-8" style="padding: 22px; font-size: 18px; border-radius: 16px;">🎓 8 КЛАСС</button>
 <button onclick="showScreen('screen-survey')" class="btn-mcko" style="margin-top: 10px; background-color: #6f42c1;">📝 !!! Пройдите опрос !!!</button>
 </div>
 
@@ -1025,7 +1030,11 @@ async function apiCall(action, difficulty = 'medium', specificId = null) {
       document.querySelector('.copy-btn').style.display = 'none'; 
   } else {
       display.style.display = 'block';
-      display.innerText = dataString;
+      let outText = dataString;
+      if (action === 'dates' || action === 'terms') {
+          outText = dataString.split('\n').map(l => l.trim()).filter(l => l).join('\n\n');
+      }
+      display.innerText = outText;
       document.querySelector('.copy-btn').style.display = 'block';
       
       // Скрываем обертку квиза, так как пришел текст
