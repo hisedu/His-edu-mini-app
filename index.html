@@ -1069,19 +1069,32 @@ async function apiCall(action, difficulty = 'medium', specificId = null) {
 }
 function copyToClipboard() {
 const resultTextElement = document.getElementById('result-text');
-const textToCopy = resultTextElement.textContent || resultTextElement.innerText;
-if (textToCopy) {
-navigator.clipboard.writeText(textToCopy).then(() => {
+// innerText отражает реальные переносы строк (абзацы), textContent их может терять
+let textToCopy = (resultTextElement.innerText || resultTextElement.textContent || '').replace(/\r\n?/g, '\n');
+if (!textToCopy.trim()) return;
+const finish = () => {
 const copyBtn = document.querySelector('.copy-btn');
 copyBtn.textContent = 'Скопировано!';
 if (tg) tg.HapticFeedback.notificationOccurred('success');
 setTimeout(() => {
 copyBtn.textContent = 'Копировать результат';
 }, 2000);
-}).catch(err => {
-console.error('Ошибка копирования: ', err);
-alert('Не удалось скопировать текст.');
-});
+};
+const fallback = () => {
+const ta = document.createElement('textarea');
+ta.value = textToCopy;
+ta.style.position = 'fixed';
+ta.style.opacity = '0';
+document.body.appendChild(ta);
+ta.focus(); ta.select();
+try { document.execCommand('copy'); } catch (e) {}
+document.body.removeChild(ta);
+finish();
+};
+if (navigator.clipboard && navigator.clipboard.writeText) {
+navigator.clipboard.writeText(textToCopy).then(finish).catch(fallback);
+} else {
+fallback();
 }
 }
 // --- ВСПОМОГАТЕЛЬНАЯ ФУНКЦИЯ ДЛЯ ПАРСИНГА JSON (ОБНОВЛЕНО) ---
