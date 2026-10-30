@@ -145,7 +145,7 @@ translateY(0); } }
 <button onclick="selectClass(6)" class="btn-class-6" style="padding: 22px; font-size: 18px; border-radius: 16px;">🎓 6 КЛАСС</button>
 <button onclick="selectClass(7)" class="btn-class-7" style="padding: 22px; font-size: 18px; border-radius: 16px;">🎓 7 КЛАСС</button>
 <button onclick="selectClass(8)" class="btn-class-8" style="padding: 22px; font-size: 18px; border-radius: 16px;">🎓 8 КЛАСС</button>
-<button onclick="showScreen('screen-survey')" class="btn-mcko" style="margin-top: 10px; background-color: #6f42c1;">📝 !!! Пройдите опрос !!!</button>
+<button onclick="showScreen('screen-survey')" class="btn-mcko" style="margin-top: 10px; background-color: #6f42c1; display: none;">📝 !!! Пройдите опрос !!!</button>
 </div>
 
 <!-- ЭКРАН 0.1: Выбор курса (для классов с несколькими курсами) -->
@@ -354,6 +354,26 @@ let tg = null;
 let currentPId = null; 
 let currentClass = null; // Текущий выбранный класс (6 или 7)
 let currentCourse = null; // Текущий выбранный курс внутри класса
+
+// Временно прячем опрос (не удаляем). Поставь false, чтобы вернуть.
+const SURVEY_HIDDEN = true;
+
+// --- Подписка ---
+const WEBHOOK_URL = 'https://hisedu.app.n8n.cloud/webhook/6b2e1e97-a736-4593-9263-817bf345391f';
+let currentPlan = 'free';
+function isAnnual() { return /год|year/i.test(currentPlan); }
+function updateCopyBtn() {
+  const b = document.querySelector('.copy-btn');
+  if (b) b.style.display = isAnnual() ? 'block' : 'none';
+}
+async function fetchPlan() {
+  try {
+    if (!tg) return;
+    const r = await fetch(`${WEBHOOK_URL}?action=status&auth=${encodeURIComponent(tg.initData)}`);
+    currentPlan = ((await r.text()) || '').trim() || 'free';
+  } catch (e) { /* оставляем free */ }
+  updateCopyBtn();
+}
 
 // --- КОНФИГУРАЦИЯ КЛАССОВ ---
 // У класса может быть несколько курсов (7 класс: Всеобщая история и История России).
@@ -765,7 +785,7 @@ function showScreen(screenId) {
     document.getElementById('quiz-wrapper').style.display = 'none'; 
     document.getElementById('explanation-area').style.display = 'none';
     document.getElementById('result-text').style.display = 'block'; 
-    document.querySelector('.copy-btn').style.display = 'block'; 
+    updateCopyBtn(); 
     if (tg) tg.HapticFeedback.impactOccurred('light');
     document.getElementById(screenId).style.display = 'flex';
 
@@ -989,6 +1009,19 @@ document.getElementById('current-paragraph-title').innerText = `Параграф
 showScreen('screen-paragraph-actions');
 }
 // !!! ГЛАВНАЯ ФУНКЦИЯ API CALL ОСТАЕТСЯ БЕЗ ИЗМЕНЕНИЙ В ЛОГИКЕ !!!
+// Превращает ссылки в тексте в кликабельные (с экранированием HTML)
+function escapeHtml(s) {
+    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+function linkify(text) {
+    const escaped = escapeHtml(text);
+    return escaped.replace(/(https?:\/\/[^\s<]+|t\.me\/[^\s<]+|@[A-Za-z0-9_]{4,})/g, (m) => {
+        let href = m;
+        if (m[0] === '@') href = 'https://t.me/' + m.slice(1);
+        else if (!/^https?:\/\//.test(m)) href = 'https://' + m;
+        return '<a href="' + href + '" target="_blank" rel="noopener" style="color: inherit; text-decoration: underline;">' + m + '</a>';
+    });
+}
 async function apiCall(action, difficulty = 'medium', specificId = null) {
  // Заглушка: материалы класса ещё не подключены
  if (!isClassEnabled()) {
@@ -1024,7 +1057,7 @@ async function apiCall(action, difficulty = 'medium', specificId = null) {
   const response = await fetch(url);
   const dataString = await response.text(); 
     const quizDataArrayParsed = tryParseJson(dataString);
-    if (Array.isArray(quizDataArrayParsed) && quizDataArrayParsed.length >= 10) { 
+    if (Array.isArray(quizDataArrayParsed) && quizDataArrayParsed.length > 0 && Array.isArray(quizDataArrayParsed[0].a)) { 
       display.style.display = 'none'; 
       startQuiz(quizDataArrayParsed); 
       document.querySelector('.copy-btn').style.display = 'none'; 
@@ -1034,14 +1067,14 @@ async function apiCall(action, difficulty = 'medium', specificId = null) {
       if (action === 'dates' || action === 'terms') {
           outText = dataString.split('\n').map(l => l.trim()).filter(l => l).join('\n\n');
       }
-      display.innerText = outText;
-      document.querySelector('.copy-btn').style.display = 'block';
+      display.innerHTML = linkify(outText);
+      updateCopyBtn();
       
       // Скрываем обертку квиза, так как пришел текст
       if (quizWrapper) quizWrapper.style.display = 'none'; 
 
       // ПРОВЕРКА: Показываем кнопку только если опрос еще не пройден
-      if (!localStorage.getItem('survey_completed')) {
+      if (!SURVEY_HIDDEN && !localStorage.getItem('survey_completed')) {
           let apiSurveyBtn = document.getElementById('api-survey-btn');
           if (!apiSurveyBtn) {
               apiSurveyBtn = document.createElement('button');
@@ -1243,7 +1276,7 @@ if (!newTestBtn) {
 }
 newTestBtn.style.display = 'block';
    // ПРОВЕРКА: Если метки 'survey_completed' НЕТ, показываем кнопку
-    if (!localStorage.getItem('survey_completed')) {
+    if (!SURVEY_HIDDEN && !localStorage.getItem('survey_completed')) {
         let surveyInviteBtn = document.getElementById('survey-invite-btn');
         if (!surveyInviteBtn) {
             surveyInviteBtn = document.createElement('button');
@@ -1282,6 +1315,7 @@ tg.ready();
 generateQuizButtons('easy-buttons-grid', 'easy', 'screen-easy-quiz-select');
 generateQuizButtons('hard-buttons-grid', 'hard', 'screen-hard-quiz-select');
 showScreen('screen-class-select');
+fetchPlan();
 } else {
 setTimeout(initWebApp, 100); 
 }
