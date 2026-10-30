@@ -89,9 +89,12 @@ translateY(0); } }
   color: var(--text-color);
   text-align: left;
   cursor: pointer;
+  transform: none;
+  -webkit-tap-highlight-color: transparent;
   transition: background-color 0.3s, color 0.3s;
 }
-.quiz-btn:hover { opacity: 0.9; }
+.quiz-btn:active { transform: none; }
+@media (hover: hover) { .quiz-btn:hover { opacity: 0.9; } }
 .quiz-btn.correct { background-color: #4CAF50 !important; color: white !important; }
 .quiz-btn.incorrect { background-color: #f44336 !important; color: white !important; }
 #explanation-area {
@@ -1214,7 +1217,7 @@ function loadQuestion(index) {
   document.getElementById('explanation-text').innerText = data.e;
   document.getElementById('explanation-area').style.display = 'block';
   nextBtn.style.display = 'block';
-  explanationArea.scrollIntoView({ behavior: 'smooth' });
+  explanationArea.scrollIntoView({ behavior: 'auto', block: 'nearest' });
   };
   optionsEl.appendChild(btn);
  });
